@@ -21,8 +21,6 @@ n_players = 0
 left_corner_of_area = (0.0,0.0)
 
 # Initialisation info for server
-base_location = None
-device_ids = None
 
 # ** PI to Mesh **
 
@@ -47,17 +45,10 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-	send_init()
+    send_init()
    
 def send_init():
-    # Send initialisation information from mesh
-    
-    while not ready:
-		try:
-			get_dev_ids()
-		finally:
-			ready = True
-    
+    # Send information from mesh
     initMessage = {"state": "init", "dimensions": [50, 50], "base_location":
 [25, 25, 0], "device_ids": ["1", "2", "3", "4", "5", "6"]}
     pair_stream.send_json(initMessage)
