@@ -3,9 +3,15 @@ from zmq.eventloop import zmqstream
 from zmq.utils import jsonapi
 from sys import argv, exit
 
+from SocketConnection import SocketConnection
+from Packet import Packet
+from payload import *
+
+import time
+
 if (len(argv) != 3):
-	print "Invalid number of arguments. Usage: steve.py host port"
-	exit()
+    print "Invalid number of arguments. Usage: steve.py host port"
+    exit()
 
 # ** PI to Server **
 ctx = context.Context.instance()
@@ -26,6 +32,13 @@ device_ids = None
 
 # ** PI to Mesh **
 
+mesh_listening_socket = None
+mesh_sending_socket = None
+
+currentFreeAddress = 1
+
+# Stores the ID of the specks as {speckID : assignedAddress}
+id_dict = dict()
 
 
 def pair_recv(msg):
@@ -47,21 +60,60 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-	send_init()
+    send_init()
    
 def send_init():
     # Send initialisation information from mesh
+    print "Connecting to mesh network..."
+    mesh_listening_socket = SocketConnection('localhost')
+    while True:
+       
+        if mesh_listening_socket.connectAsReceiver():
+            mesh_sending_socket = SocketConnection('', 29877)
+            if mesh_sending_socket.connectAsSender():
+                # Start the connection to the mesh
+                mesh_sending_socket.sendData('*')
+                # Assign addresses to the expected number of nodes
+                while(len(id_dict) < n_players):
+                    data = mesh_listening_socket.receiveData()
+                    packet = Packet(data)
+                    if packet.isIdentification():
+                        speck_id = packet.getPayload().getId()
+                        print "Id request from %s" % speck_id
+                        # Try assigning again - packet may have dropped
+                        assignId(speck_id)
+                break
+            else: 
+                time.sleep(1)
+        else:
+            time.sleep(1)
     
-    while not ready:
-		try:
-			get_dev_ids()
-		finally:
-			ready = True
-    
-    initMessage = {"state": "init", "dimensions": [50, 50], "base_location":
-[25, 25, 0], "device_ids": ["1", "2", "3", "4", "5", "6"]}
+    ids_to_send = [str(item) for item in id_dict.values()]
+    initMessage = {"state": "init", "base_location": [25, 25, 0],
+"device_ids": ids_to_send}
     pair_stream.send_json(initMessage)
 
+def assignId(speck_id):
+    global currentFreeAddress
+    payload = PayloadIdentification()
+    if not speck_id in id_dict:
+        id_dict[currentFreeAddress] = speck_id
+        print "Speck {0} has now been given address {1}".format(speck_id,
+currentFreeAddress)
+        payload.initialise(speck_id,currentFreeAddress)
+        currentFreeAddress += 1
+    else:
+        print "Speck %s has already been identified" % speck_id
+        payload.initialise(speck_id, id_dict[speck_id])
+    createAndSendPacket(0xFF,0x01,0x00,0x00, payload)
+   
+def createAndSendPacket(destinationId,ttl,msgType,timestamp,payload):
+    p = Packet()
+    p.initialise(0,destinationId,ttl,msgType,timestamp,payload)
+    print "Creating and Sending: "
+    print p
+    global mesh_sending_socket
+    mesh_sending_socket.sendData(p.getBytes())
 
 command_stream.send_multipart(["PI"])
 command_stream.on_recv(setup_pair)

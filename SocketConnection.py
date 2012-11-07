@@ -29,7 +29,7 @@ class SocketConnection:
 			print 'connected!'
 			return True
 		except Exception as e:
-			print 'Oh teh noez! ' + e.strerror
+			print 'Failed to connect as sender: ' + e.strerror
 			return False
 			
 	
@@ -39,7 +39,7 @@ class SocketConnection:
 			print 'Connected!'
 			return True
 		except Exception as e:
-			print 'Oh teh noez! ' + e.strerror
+			print 'Failed to connect as receiver: ' + e.strerror
 			return False
 	
 	def receiveData(self, buffersize=None):
