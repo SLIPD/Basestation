@@ -14,11 +14,11 @@ def quit():
     sys.exit()
 
 def sendLoop():
+    global databuffer
+    global socketConnection
     while(True):
-    	global databuffer
         while(len(databuffer) > 0):
             currentMsg = databuffer.pop(0)
-            global socketConnection
             socketConnection.sendData(currentMsg)
         time.sleep(0.1)
         
@@ -50,6 +50,9 @@ def getInput():
 				if(not isNulls(data)):
 					print "Writing: " + data.encode('hex_codec')
 					serial.write(data)
+				else:
+					print "NUUUUUUUUUUUULLLLLLS!!!!"
+			
 		else:
 			print "NO LISTENING CONNECTION"
 	except:
@@ -58,8 +61,9 @@ def getInput():
 		listeningSocket.close()
 
 def readSerial():
-	print 'Thread started'
+	print 'readSerial Thread started'
 		
+	global isReady
 	while not isReady:
 		time.sleep(0.1)
 	

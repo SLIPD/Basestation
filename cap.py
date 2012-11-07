@@ -73,8 +73,10 @@ try:
 		else :
 			threading.Thread(target = getKeyInput).start()
 			while(True):
-				
 				data = listeningSocket.receiveData()
+				print ".",
+				if(len(data) == 0):
+					continue
 				packet = Packet(data)
 				print "Current Packet: "
 				print packet

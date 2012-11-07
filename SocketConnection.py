@@ -5,14 +5,14 @@ class SocketConnection:
 	HOST = None
 	PORT = None
 	ADDR = None
-	BUFSIZE = 4096    #reasonably sized buffer for data
+	BUFSIZE = 32
 	
 	databuffer = []
 	
 	serv = None  
 	conn = None
 	
-	def __init__(self, host='', port=29876, buffersize=4096):
+	def __init__(self, host='', port=29876, buffersize=32):
 		self.HOST = host
 		self.PORT = port
 		self.ADDR = (self.HOST,self.PORT)

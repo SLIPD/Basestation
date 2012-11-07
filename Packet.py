@@ -19,9 +19,15 @@ class Packet(object):
 	
 	def __init__(self, data=None):
 		if data != None:
+			print "<DATA>",
+			for i in range(0,len(data)):
+				print int(data[0]),
+				print ",",
+			print "</DATA>"
 			header = data[:6]
-			print "PACKET INIT: ",
-			print header.encode('hex_codec')
+			print "<PACKET>",
+			print header.encode('hex_codec'),
+			print "</PACKET>"
 			payload = data[6:]
 			self.originId,self.destinationId,self.ttl,self.msgType,self.timestamp = unpack('BBBBH',header)
 			if self.msgType == 0:
