@@ -7,8 +7,12 @@ class SerialConnection:
 	connection = None
 	
 	def connect(self, device, baudrate=115200):
-		self.connection=serial.Serial(device,baudrate)
-		return True
+		while True:
+			try:
+				self.connection=serial.Serial(device,baudrate)
+				return True
+			except:
+				pass
 	
 	def removeInitialNulls(self):
 		char = self.read(1)

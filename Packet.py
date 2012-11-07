@@ -1,5 +1,6 @@
 from struct import *
 from payload import *
+import cPickle as pickle
 
 '''Packet is the base communication unit between the specks and the server'''
 class Packet(object):
@@ -10,6 +11,11 @@ class Packet(object):
 	msgType = None
 	timestamp = None
 	payload = None
+	
+	
+	@staticmethod
+	def deserialize(data):
+		return pickle.loads(data)
 	
 	def __init__(self, data=None):
 		if data != None:
@@ -24,6 +30,9 @@ class Packet(object):
 				self.payload = PayloadWaypoint(payload)
 			elif self.msgType == 3:
 				self.payload = PayloadMessage(payload)
+				
+	def serialize(self):
+		return pickle.dumps(self)
 	
 	def initialise(self,originId,destinationId,ttl,msgType,timestamp,payload):
 		self.originId = originId
@@ -35,6 +44,9 @@ class Packet(object):
 		
 	def isMessage(self):
 		return isinstance(self.payload,PayloadMessage)
+		
+	def isIdentification(self):
+		return isinstance(self.payload,PayloadIdentification)
 	
 	def getOriginId(self):
 		return self.originId

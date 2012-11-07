@@ -4,6 +4,12 @@ def padTo26(data):
 	nulls = ''.join(['\0']*26)
 	return (str(data) + nulls)[:26]
 
+PayloadIdentificationType = 0x00
+PayloadNodePositionType = 	0x01
+PayloadWaypointType = 		0x02
+PayloadMessageType = 		0x03
+
+
 '''PayloadNodePosition holds the position of nodes'''
 class PayloadNodePosition(object):
 	
@@ -22,7 +28,10 @@ class PayloadNodePosition(object):
 		self.long = longitude
 		self.elevation = elevation
 		self.hexaseconds = hexaseconds
-		
+	
+	def getType():
+		return 0x01
+	
 	def getBytes(self):
 		return pack('IIHH', self.lat, self.long, self.elevation, self.hexaseconds)
 		
@@ -63,6 +72,9 @@ class PayloadWaypoint(object):
 		self.lastSeqNum = lastSeqNum
 		self.points = points
 		
+	def getType():
+		return 0x02
+		
 	def getBytes(self):
 		lat1,long1 = self.points[0]
 		lat2,long2 = self.points[1]
@@ -99,6 +111,9 @@ class PayloadIdentification(object):
 		self.id = id
 		self.nodeId = nodeId
 		
+	def getType():
+		return 0x00
+		
 	def getBytes(self):
 		return pack('QB', self.id, self.nodeId)
 	
@@ -112,7 +127,7 @@ class PayloadIdentification(object):
 		return self.nodeId
 		
 	def __str__(self):
-		return "(id,nodeId) = (" + str(self.id) + "," + str(self.nodeId) + ")"
+		return "(id,nodeId) = (0x%X,%s)" % (self.id, self.nodeId)
 
 
 '''PayloadMessage is used for sending messages back and forth'''
@@ -126,7 +141,10 @@ class PayloadMessage(object):
 			
 	def initialise(self, message):
 		self.message = message
-		
+	
+	def getType():
+		return 0x03
+	
 	def getBytes(self):
 		return pack('26s', self.message)
 	
