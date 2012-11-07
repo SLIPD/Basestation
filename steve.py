@@ -65,7 +65,7 @@ def setup_pair(msg):
 def send_init():
     # Send initialisation information from mesh
     print "Connecting to mesh network..."
-    global mesh_listening_socket, mesh_sending_socket
+    global mesh_listening_socket, mesh_sending_socket, id_dict, n_players
     mesh_listening_socket = SocketConnection('localhost')
     
     while True:
