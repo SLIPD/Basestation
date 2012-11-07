@@ -89,6 +89,8 @@ try:
 		serial.removeInitialNulls()
 		print "NULLS REMOVED"
 		
+		databuffer.append('\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+		
 		while True:
 			data = serial.read(32)
 			print data.encode('hex_codec')

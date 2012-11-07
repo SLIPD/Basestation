@@ -77,8 +77,7 @@ def send_init():
                 mesh_sending_socket.sendData('*')
                 # Assign addresses to the expected number of nodes
                 start_time = time.clock()
-                while (len(id_dict) < n_players) and (time.clock() < start_time
-+ 5) :
+                while (len(id_dict) < n_players) and (time.clock() < start_time + 5) :
                     data = mesh_listening_socket.receiveData(32)
                     packet = Packet(data)
                     if packet.isIdentification():
@@ -93,8 +92,7 @@ def send_init():
             time.sleep(1)
     
     ids_to_send = [str(item) for item in id_dict.values()]
-    initMessage = {"state": "init", "base_location": [25, 25, 0],
-"device_ids": ids_to_send}
+    initMessage = {"state": "init", "base_location": [25, 25, 0],"device_ids": ids_to_send}
     pair_stream.send_json(initMessage)
 
 def assignId(speck_id):
@@ -102,8 +100,7 @@ def assignId(speck_id):
     payload = PayloadIdentification()
     if not speck_id in id_dict:
         id_dict[speck_id] = currentFreeAddress
-        print "Speck {0} has now been given address {1}".format(speck_id,
-currentFreeAddress)
+        print "Speck {0} has now been given address {1}".format(speck_id, currentFreeAddress)
         payload.initialise(speck_id,currentFreeAddress)
         currentFreeAddress += 1
     else:
