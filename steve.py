@@ -99,7 +99,7 @@ def assignId(speck_id):
     global currentFreeAddress
     payload = PayloadIdentification()
     if not speck_id in id_dict:
-        id_dict[currentFreeAddress] = speck_id
+        id_dict[speck_id] = currentFreeAddress
         print "Speck {0} has now been given address {1}".format(speck_id,
 currentFreeAddress)
         payload.initialise(speck_id,currentFreeAddress)
