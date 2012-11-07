@@ -14,26 +14,26 @@ PayloadMessageType = 		0x03
 class PayloadNodePosition(object):
 	
 	lat = None
-	long = None
-	elevation = None
+	lon = None
+	ele = None
 	hexaseconds = None
 	
 	def __init__(self,data=None):
 		if(data != None):
 			payload = data[:12]
-			self.lat,self.long,self.elevation,self.hexaseconds = unpack('IIHH',payload)
+			self.lat,self.lon,self.ele,self.hexaseconds = unpack('IIHH',payload)
 			
 	def initialise(self, latitude, longitude, elevation, hexaseconds):
 		self.lat = latitude
-		self.long = longitude
-		self.elevation = elevation
+		self.lon = longitude
+		self.ele = elevation
 		self.hexaseconds = hexaseconds
 	
 	def getType():
 		return 0x01
 	
 	def getBytes(self):
-		return pack('IIHH', self.lat, self.long, self.elevation, self.hexaseconds)
+		return pack('IIHH', self.lat, self.lon, self.ele, self.hexaseconds)
 		
 	def getPaddedBytes(self):
 		return padTo26(self.getBytes())
@@ -41,17 +41,18 @@ class PayloadNodePosition(object):
 	def getLat(self):
 		return self.lat
 		
-	def getLong(self):
-		return self.long
+	def getLon(self):
+		return self.lon
 		
-	def getElevation(self):
-		return self.elevation
+	def getEle(self):
+		return self.ele
 	
 	def getHexaseconds(self):
 		return self.hexaseconds
 		
 	def __str__(self):
-		return "(lat,long,elevation,hexaseconds) = (" + str(self.lat) + "," + str(self.long) + "," + str(self.elevation) + "," + str(self.hexaseconds) + ")"
+		return "(lat,long,elevation,hexaseconds) = (" + str(self.lat) + "," +
+str(self.lon) + "," + str(self.ele) + "," + str(self.hexaseconds) + ")"
 
 
 '''PayloadWaypoint holds a list of waypoints for the player to go to'''
