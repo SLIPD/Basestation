@@ -80,8 +80,7 @@ def send_init():
                 mesh_sending_socket.sendData('*')
                 first_packet = Patcket(mesh_listening_socket.receiveData())
                 first_payload = first_packet.getPayload()
-                base_gps = (first_payload.getLat(), first_payload.getLon(),
-first_payload.getEle())
+                base_gps = (first_payload.getLat(), first_payload.getLon(), first_payload.getEle())
                 print base_gps
                 s_time = time.clock()
                 # Assign addresses to the expected number of nodes
@@ -113,8 +112,7 @@ def assignId(speck_id):
     payload = PayloadIdentification()
     if not speck_id in id_dict:
         id_dict[speck_id] = currentFreeAddress
-        print "Speck {0} has now been given address {1}".format(speck_id,
-currentFreeAddress)
+        print "Speck {0} has now been given address {1}".format(speck_id, currentFreeAddress)
         payload.initialise(speck_id,currentFreeAddress)
         currentFreeAddress += 1
     else:
