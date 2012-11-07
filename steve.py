@@ -76,10 +76,9 @@ def send_init():
                 print "Sending init packet to mesh"
                 mesh_sending_socket.sendData('*')
                 # Assign addresses to the expected number of nodes
-                while len(id_dict) < n_players:
-                    print id_dict
-                    print len(id_dict)
-                    print n_players
+                start_time = time.clock()
+                while (len(id_dict) < n_players) and (time.clock() < start_time
++ 5) :
                     data = mesh_listening_socket.receiveData(32)
                     packet = Packet(data)
                     if packet.isIdentification():
@@ -87,8 +86,6 @@ def send_init():
                         print "Id request from %s" % speck_id
                         # Try assigning again - packet may have dropped
                         assignId(speck_id)
-                    else:
-                        print "Not an ID packet"
                 break
             else: 
                 time.sleep(1)
