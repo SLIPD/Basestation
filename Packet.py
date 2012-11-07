@@ -20,6 +20,8 @@ class Packet(object):
 	def __init__(self, data=None):
 		if data != None:
 			header = data[:6]
+			print "PACKET INIT: ",
+			print header.encode('hex_codec')
 			payload = data[6:]
 			self.originId,self.destinationId,self.ttl,self.msgType,self.timestamp = unpack('BBBBH',header)
 			if self.msgType == 0:
