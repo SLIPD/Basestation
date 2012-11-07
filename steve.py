@@ -26,10 +26,6 @@ pair_stream = None
 n_players = 0
 left_corner_of_area = (0.0,0.0)
 
-# Initialisation info for server
-base_location = None
-device_ids = None
-
 # ** PI to Mesh **
 mesh_listening_socket = None
 mesh_sending_socket = None
@@ -45,6 +41,10 @@ base_gps = None
 
 def pair_recv(msg):
     print jsonapi.loads(''.join(msg))
+    
+def loc_translate(gps_coords):
+    global base_location
+
 
 # Creates the paired port to the game server.
 def setup_pair(msg):
@@ -71,19 +71,24 @@ def send_init():
     
     mesh_listening_socket = SocketConnection('localhost')
     
+    # Perform initialisation actions with mesh: get location and assign addresses.
     while True:
         if mesh_listening_socket.connectAsReceiver():
             mesh_sending_socket = SocketConnection('', 29877)
             if mesh_sending_socket.connectAsSender():
+                
                 # Start the connection to the mesh
                 print "Sending init packet to mesh"
                 mesh_sending_socket.sendData('*')
+                
+                # Get the base station location packet
                 first_packet = Patcket(mesh_listening_socket.receiveData())
                 first_payload = first_packet.getPayload()
                 base_gps = (first_payload.getLat(), first_payload.getLon(), first_payload.getEle())
                 print base_gps
-                s_time = time.clock()
+                
                 # Assign addresses to the expected number of nodes
+                s_time = time.clock()
                 while (len(id_dict) < n_players) and (time.clock() < s_time+ 5):
                     data = mesh_listening_socket.receiveData()
                     packet = Packet(data)
@@ -92,17 +97,20 @@ def send_init():
                         print "Id request from %s" % speck_id
                         # Try assigning again - packet may have dropped
                         assignId(speck_id)
-                        # Reset the start time so we wait from last packet
+                        # Reset the start time so we wait from last receive
                         s_time = time.clock()
                 break
+            # If creating sockets doesn't work, wait and try again
             else: 
                 time.sleep(1)
         else:
             time.sleep(1)
-    
+    # Package the assigned addresses for server
     ids_to_send = [str(item) for item in id_dict.values()]
-
-    initMessage = {"state": "init", "base_location": [25, 25, 0],"device_ids": ids_to_send}
+    
+    base_location = loc_translate(base_gps)
+    
+    initMessage = {"state": "init", "base_location": base_location,"device_ids": ids_to_send}
     pair_stream.send_json(initMessage)
 
 def assignId(speck_id):
