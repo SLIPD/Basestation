@@ -77,6 +77,9 @@ def send_init():
                 mesh_sending_socket.sendData('*')
                 # Assign addresses to the expected number of nodes
                 while(len(id_dict) < n_players):
+                    print id_dict
+                    print len(id_dict)
+                    print n_players
                     data = mesh_listening_socket.receiveData(32)
                     packet = Packet(data)
                     if packet.isIdentification():
