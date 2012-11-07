@@ -50,7 +50,7 @@ def setup_pair(msg):
     [new_port, n_devices, zx, zy] = msg
     print "Reply Received. Port: " + str(new_port)
    
-    n_players = n_devices
+    n_players = int(n_devices)
     left_corner_of_area = (zx, zy)
     
     # Create a paired socket to communicate with server
@@ -76,7 +76,7 @@ def send_init():
                 print "Sending init packet to mesh"
                 mesh_sending_socket.sendData('*')
                 # Assign addresses to the expected number of nodes
-                while len(id_dict) < (n_players - 1):
+                while len(id_dict) < n_players:
                     print id_dict
                     print len(id_dict)
                     print n_players
