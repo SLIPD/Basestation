@@ -41,7 +41,7 @@ def getInput():
 				while True:
 					data = listeningSocket.receiveData(1)
 					if data == '*':
-						print "Received ready message"
+						print "Received ready message from server"
 						isReady = True
 						break
 			
@@ -57,7 +57,26 @@ def getInput():
 	finally:
 		listeningSocket.close()
 
-
+def readSerial():
+	print 'Thread started'
+		
+	while not isReady:
+		time.sleep(0.1)
+	
+	print "Sending speck ready message"
+	serial.write('*')
+	
+	print "Removing nulls"
+	serial.removeInitialNulls()
+	print "NULLS REMOVED"
+	
+	while True:
+		data = serial.read(32)
+		print data.encode('hex_codec')
+		databuffer.append(data)
+	
+	
+	serial.close()
 
 try:
 	databuffer = []
@@ -76,26 +95,7 @@ try:
 	if(socketConnection.connectAsSender()):
 		threading.Thread(target = sendLoop).start()
 		threading.Thread(target = getInput).start()
-		
-		print 'Thread started'
-		
-		while not isReady:
-			time.sleep(0.1)
-		
-		print "Sending speck ready message"
-		serial.write('*')
-		
-		print "Removing nulls"
-		serial.removeInitialNulls()
-		print "NULLS REMOVED"
-		
-		while True:
-			data = serial.read(32)
-			print data.encode('hex_codec')
-			databuffer.append(data)
-		
-		
-		serial.close()
+		threading.Thread(target = readSerial).start()
 except:
 	pass
 finally:
