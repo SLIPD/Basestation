@@ -73,6 +73,7 @@ def send_init():
             mesh_sending_socket = SocketConnection('', 29877)
             if mesh_sending_socket.connectAsSender():
                 # Start the connection to the mesh
+                print "Sending init packet to mesh"
                 mesh_sending_socket.sendData('*')
                 # Assign addresses to the expected number of nodes
                 while(len(id_dict) < n_players):
