@@ -101,10 +101,8 @@ def send_init():
             time.sleep(1)
     
     ids_to_send = [str(item) for item in id_dict.values()]
-    
-    # I also need to translate gps to game co-ordinates. Many to one!
-    initMessage = {"state": "init", "base_location": [25, 25, 0],
-"device_ids": ids_to_send}
+
+    initMessage = {"state": "init", "base_location": [25, 25, 0],"device_ids": ids_to_send}
     pair_stream.send_json(initMessage)
 
 def assignId(speck_id):
