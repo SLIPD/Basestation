@@ -41,10 +41,10 @@ base_gps = None
 
 def pair_recv(msg):
     print jsonapi.loads(''.join(msg))
-    
-def loc_translate(gps_coords):
-    global base_location
 
+# Translate GPS co-ords into game co-ordinates
+def loc_translate(gps_coords):
+    return [25,25,0]
 
 # Creates the paired port to the game server.
 def setup_pair(msg):
@@ -67,7 +67,7 @@ def setup_pair(msg):
 def send_init():
     # Send initialisation information from mesh
     print "Connecting to mesh network..."
-    global mesh_listening_socket, mesh_sending_socket, n_players base_gps
+    global mesh_listening_socket, mesh_sending_socket, n_players, base_gps
     
     mesh_listening_socket = SocketConnection('localhost')
     
