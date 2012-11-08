@@ -104,64 +104,51 @@ def encodedData(string):
     return returnData;
     
 
-
-'''
-uint8_t* decodedData(uint8_t *string){
-
-    if(!initialised) initialise();
-    int stringBitLength = stringLength(string) * 8;
-    int outputLength = (int)ceil((double)stringBitLength / 6.0);
-    if(stringBitLength % 6 == 0) outputLength++;
-    outputLength++;
+def decodedData(inputData):
+    stringBitLength = stringLength(inputData) * 8;
+    outputLength = int(math.ceil(float(stringBitLength) / 6.0));
+    if(stringBitLength % 6 == 0):
+        outputLength += 1;
+    outputLength += 1;
     
-    uint8_t *inputData = malloc(stringLength(string) + 1);
-    memcpy(inputData,string,stringLength(string));
-    inputData[stringLength(string)] = '\0';
+    returnData = bytearray(outputLength);
     
-    uint8_t *returnData = malloc(sizeof(uint8_t) * outputLength);
+    byteNum = 0;
+    bitNum = 8;
+    current = 0;
+    for i in range(0,outputLength):
+        returnData[i] = '\x00';
     
-    int i = 0;
-    int byteNum = 0;
-    int bitNum = 8;
-    uint8_t current = 0;
-    for(i = 0; i < outputLength; i++){
-        returnData[i] = '\0';
-    }
-    
-    for(i = 0; i < outputLength; i++){
-        if(bitNum == 8){
+    for i in range(0,outputLength):
+        if(bitNum == 8):
             current = (inputData[byteNum] >> 2) & 0x3F;
             bitNum = 2;
-        } else if(bitNum == 6) {
+        elif(bitNum == 6):
             current = inputData[byteNum] & 0x3F;
-            byteNum++;
+            byteNum += 1;
             bitNum = 8;
-        } else if(bitNum == 4) {
+        elif(bitNum == 4):
             current = (inputData[byteNum] << 2) & 0x3C;
-            byteNum++;
+            byteNum += 1;
             current = current | ((inputData[byteNum] >> 6) & 0x03);
             bitNum = 6;
-        } else if(bitNum == 2) {
+        elif(bitNum == 2):
             current = (inputData[byteNum] << 4) & 0x30;
-            byteNum++;
+            byteNum += 1;
             current = current | ((inputData[byteNum] >> 4) & 0x0F);
             bitNum = 4;
-        }
-        uint8_t character = getCharacter(current,characters,CHARACTERS_LENGTH);
-        if(character == 0xFF) continue;
-        *(returnData + i) = (uint8_t)character;
-    }
-    
+        
+        character = getCharacter(current,characters);
+        if(character == 0xFF):
+            continue;
+        returnData[i] = character;
     return returnData;
     
-}'''
 
 
 testString = argv[1]
 print testString
-print printHexString(encodedData(testString))
-#print str(findPosition("C",characters))
-#encodedString = encodedData(testString);
-#printHexString(encodedString);
-#decodedString = decodedData(encodedString);
-#print decodedString;
+en = encodedData(testString)
+printHexString(en)
+de = decodedData(en)
+print de
