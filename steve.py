@@ -58,6 +58,7 @@ def pair_recv(msg):
             assign_names(j['mapping'])
         elif j['state'] == 'commanding':
             # Handle the commands
+            print "Command Stuff"
     except jsonapi.jsonmod.JSONDecodeError:
         m = "String: " + ''.join(msg)
     finally:
