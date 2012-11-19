@@ -34,28 +34,28 @@ class Base64Compression:
                 byteNum += 1;
                 current = current | ((inputData[byteNum] >> 4) & 0x0F);
                 bitNum = 4;
-    
-            if(not current):
+            
+            if(current == 0):
                 return byteNum;
     
     def printHexString(self,string):
-        stringLen = stringLength(string);
+        stringLen = len(string);
         for i in range(0,stringLen):
             print "%.2X" % string[i],
         print ""
     
     def printIntString(self,string):
-        stringLen = stringLength(string);
+        stringLen = self.stringLength(string);
         for i in range(0,stringLen):
             print "%d " % string[i],
         print ""
     
     
     def findPosition(self,character, array):
+        current = ord(character);
+        if(current >=97 and current <= 123):
+            current = current - 32;
         for i in range(0,len(array)):
-            current = ord(character);
-            if(current >=97 and current <= 123):
-                current = current - 32;
             if(chr(current) == array[i]):
                 return i;
         return 0xFF;
@@ -81,7 +81,7 @@ class Base64Compression:
             returnData[i] = '\x00';
     
         for i in range(0,len(string)):
-            value = findPosition(string[i],self.characters);
+            value = self.findPosition(string[i],self.characters);
             if(value == 0xFF):
                 continue;
             if(bitNum == 8):
@@ -106,11 +106,11 @@ class Base64Compression:
         
     
     def decodedData(self,inputData):
-        stringBitLength = stringLength(inputData) * 8;
+        stringBitLength = self.stringLength(inputData) * 8;
         outputLength = int(math.ceil(float(stringBitLength) / 6.0));
         if(stringBitLength % 6 == 0):
             outputLength += 1;
-        outputLength += 1;
+        #outputLength += 1;
         
         returnData = bytearray(outputLength);
         
@@ -139,7 +139,7 @@ class Base64Compression:
                 current = current | ((inputData[byteNum] >> 4) & 0x0F);
                 bitNum = 4;
             
-            character = getCharacter(current,self.characters);
+            character = self.getCharacter(current,self.characters);
             if(character == 0xFF):
                 continue;
             returnData[i] = character;

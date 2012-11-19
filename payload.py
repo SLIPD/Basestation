@@ -1,4 +1,5 @@
 from struct import *
+from Base64Compression import Base64Compression
 
 def padTo26(data):
     nulls = ''.join(['\0']*26)
@@ -13,46 +14,45 @@ PayloadMessageType =         0x03
 '''PayloadNodePosition holds the position of nodes'''
 class PayloadNodePosition(object):
     
-    lat = None
-    lon = None
-    ele = None
+    latitude = None
+    longitude = None
+    elevation = None
     hexaseconds = None
     
     def __init__(self,data=None):
         if(data != None):
             payload = data[:12]
-            self.lat,self.lon,self.ele,self.hexaseconds = unpack('IIHH',payload)
+            self.latitude,self.longitude,self.elevation,self.hexaseconds = unpack('IIHH',payload)
             
     def initialise(self, latitude, longitude, elevation, hexaseconds):
-        self.lat = latitude
-        self.lon = longitude
-        self.ele = elevation
+        self.latitude = latitude
+        self.longitude = longitude
+        self.elevation = elevation
         self.hexaseconds = hexaseconds
     
-    def getType():
+    def getType(self):
         return 0x01
     
     def getBytes(self):
-        return pack('IIHH', self.lat, self.lon, self.ele, self.hexaseconds)
+        return pack('IIHH', self.latitude, self.longitude, self.elevation, self.hexaseconds)
         
     def getPaddedBytes(self):
         return padTo26(self.getBytes())
     
-    def getLat(self):
-        return self.lat
+    def getLatitude(self):
+        return self.latitude
         
-    def getLon(self):
-        return self.lon
+    def getLongitude(self):
+        return self.longitude
         
-    def getEle(self):
-        return self.ele
+    def getElevation(self):
+        return self.elevation
     
     def getHexaseconds(self):
         return self.hexaseconds
         
     def __str__(self):
-        return "(lat,long,elevation,hexaseconds) = (" + str(self.lat) + "," +
-str(self.lon) + "," + str(self.ele) + "," + str(self.hexaseconds) + ")"
+        return "(lat,long,elevation,hexaseconds) = (" + str(self.latitude) + "," + str(self.longitude) + "," + str(self.elevation) + "," + str(self.hexaseconds) + ")"
 
 
 '''PayloadWaypoint holds a list of waypoints for the player to go to'''
@@ -73,7 +73,7 @@ class PayloadWaypoint(object):
         self.lastSeqNum = lastSeqNum
         self.points = points
         
-    def getType():
+    def getType(self):
         return 0x02
         
     def getBytes(self):
@@ -112,7 +112,7 @@ class PayloadIdentification(object):
         self.id = id
         self.nodeId = nodeId
         
-    def getType():
+    def getType(self):
         return 0x00
         
     def getBytes(self):
@@ -135,25 +135,60 @@ class PayloadIdentification(object):
 class PayloadMessage(object):
     
     message = None
+    encrypted = False
+    b64 = Base64Compression()
     
-    def __init__(self,data=None):
+    def __init__(self,data=None, encrypted=False):
         if(data != None):
             (self.message,) = unpack('26s',data)
+            self.encrypted = encrypted
             
     def initialise(self, message):
         self.message = message
+        self.encrypted = False
     
-    def getType():
+    def getType(self):
         return 0x03
     
     def getBytes(self):
+        self.encryptMessage()
         return pack('26s', self.message)
     
     def getPaddedBytes(self):
         return padTo26(self.getBytes())
     
-    def getMessage(self):
+    def setMessage(self,message):
+        self.message = message
+        self.encrypted = False
+    
+    def getDecryptedMessage(self):
+        self.decryptMessage()
         return self.message
+    
+    def getMessage(self):
+        self.decryptMessage()
+        return self.message
+    
+    def encryptMessage(self):
+        if(not self.encrypted):
+            self.message = self.b64.encodedData(self.message)
+            self.encrypted = True
+    
+    def decryptMessage(self):
+        if(self.encrypted):
+            self.message = self.b64.decodedData(self.message)
+            self.encrypted = False
+    
+    def printEncryptedMessage(self):
+        self.encryptMessage()
+        self.b64.printHexString(self.message)
+        
+    def printDecryptedMessage(self):
+        self.decryptMessage()
+        print self
         
     def __str__(self):
-        return "(message) = (" + str(self.message) + ")"
+        if(self.encrypted):
+            return "HEX: " + self.b64.printHexString(self.message)
+        else:
+            return "(message) = (" + str(self.message) + ")"
