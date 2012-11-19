@@ -39,8 +39,30 @@ id_dict = dict()
 # The GPS location of the base station
 base_gps = None
 
+# Set the ball rolling...
+command_stream.send_multipart(["PI"])
+command_stream.on_recv(setup_pair)
+
+command_stream.io_loop.start()
+
 def pair_recv(msg):
-    print jsonapi.loads(''.join(msg))
+    print "Received from Server"
+    try:
+        try:
+            j = jsonapi.loads(''.join(msg))
+        except TypeError:
+            j = jsonapi.loads(msg)
+        m = "JSON: " + str(j)
+
+        if j['state'] == 'naming':
+            assign_names(j['mapping'])
+        elif j['state'] == 'commanding':
+            # Handle the commands
+    except jsonapi.jsonmod.JSONDecodeError:
+        m = "String: " + ''.join(msg)
+    finally:
+        pass
+    print m
 
 # Translate GPS co-ords into game co-ordinates
 def loc_translate(gps_coords):
@@ -62,7 +84,24 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-    send_init()
+    #send_init()
+    send_init_no_mesh()
+
+# Dummy initialisation with the server
+def send_init_no_mesh():
+    global n_players
+    
+    # Add dummy adresses for expected number of players
+    for i in range(0, n_players):
+        id_dict[i] = currentFreeAddress
+        currentFreeAddress += 1
+    ids_to_send = [str(item) for item in id_dict.values()]
+    
+    base_location = loc_translate((0,0,0))
+    
+    # Send the itialisation message to the server
+    initMessage = {"state": "init", "base_location": base_location,"device_ids": ids_to_send}
+    pair_stream.send_json(initMessage)
    
 def send_init():
     # Send initialisation information from mesh
@@ -84,7 +123,7 @@ def send_init():
                 # Get the base station location packet
                 first_packet = Patcket(mesh_listening_socket.receiveData())
                 first_payload = first_packet.getPayload()
-                base_gps = (first_payload.getLat(), first_payload.getLon(), first_payload.getEle())
+                base_gps = (first_payload.getLatitude(), first_payload.getLongitude(), first_payload.getElevation())
                 print base_gps
                 
                 # Assign addresses to the expected number of nodes
@@ -94,9 +133,12 @@ def send_init():
                     packet = Packet(data)
                     if packet.isIdentification():
                         speck_id = packet.getPayload().getId()
+                        
                         print "Id request from %s" % speck_id
-                        # Try assigning again - packet may have dropped
-                        assignId(speck_id)
+                        
+                        # Respond to all requests: packet may have dropped
+                        assign_address(speck_id)
+                        
                         # Reset the start time so we wait from last receive
                         s_time = time.clock()
                 break
@@ -105,28 +147,36 @@ def send_init():
                 time.sleep(1)
         else:
             time.sleep(1)
+    
     # Package the assigned addresses for server
     ids_to_send = [str(item) for item in id_dict.values()]
     
     base_location = loc_translate(base_gps)
     
+    # Send the itialisation message to the server
     initMessage = {"state": "init", "base_location": base_location,"device_ids": ids_to_send}
     pair_stream.send_json(initMessage)
 
-def assignId(speck_id):
+# Assign an address from the next free address
+def assign_address(speck_id):
     global currentFreeAddress
     payload = PayloadIdentification()
+    
+    # Only assign an address if we don't have one yet, else send it again. 
     if not speck_id in id_dict:
         id_dict[speck_id] = currentFreeAddress
         print "Speck {0} has now been given address {1}".format(speck_id, currentFreeAddress)
-        payload.initialise(speck_id,currentFreeAddress)
+        payload.initialise(speck_id, currentFreeAddress)
         currentFreeAddress += 1
     else:
         print "Speck %s has already been identified" % speck_id
         payload.initialise(speck_id, id_dict[speck_id])
-    createAndSendPacket(0xFF,0x01,0x00,0x00, payload)
+    
+    # Send this ID packet broadcast, with destinationId = 0xFF
+    create_and_send_packet(0xFF,0x01,0x00,0x00, payload)
    
-def createAndSendPacket(destinationId,ttl,msgType,timestamp,payload):
+# Send a packet to a speck once it has an assigned address.
+def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
     p = Packet()
     p.initialise(0,destinationId,ttl,msgType,timestamp,payload)
     print "Creating and Sending: "
@@ -134,7 +184,14 @@ def createAndSendPacket(destinationId,ttl,msgType,timestamp,payload):
     global mesh_sending_socket
     mesh_sending_socket.sendData(p.getBytes())
 
-command_stream.send_multipart(["PI"])
-command_stream.on_recv(setup_pair)
-
-command_stream.io_loop.start()
+# Give names to all specks as messages
+def assign_names(names):
+    for speck_id in id_dict.values():
+        assigned_name = names[speck_id]
+        
+        print "Giving name {0} to speck {1}".format(assigned_name, speck_id)
+        
+        m = PayloadMessage()
+        m.initialise(assigned_name)
+        m.getBytes()
+        create_and_send_packet(speck_id,1,3,0,m) 
