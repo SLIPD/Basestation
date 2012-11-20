@@ -88,7 +88,9 @@ def setup_pair(msg):
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
-    global current_free_address, n_players, pair_stream
+    global mesh_listening_socket, current_free_address, n_players, pair_stream
+    
+    mesh_listening_socket = SocketConnection('localhost')
     
     # Add dummy adresses for expected number of players
     for i in range(0, n_players):
