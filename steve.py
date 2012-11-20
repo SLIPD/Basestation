@@ -51,6 +51,7 @@ def pair_recv(msg):
             j = jsonapi.loads(''.join(msg))
         except TypeError:
             j = jsonapi.loads(msg)
+        
         m = "JSON: " + str(j)
 
         if j['state'] == 'naming':
@@ -58,8 +59,6 @@ def pair_recv(msg):
         elif j['state'] == 'commanding':
             # Handle the commands
             print "Command Stuff"
-    except jsonapi.jsonmod.JSONDecodeError:
-        m = "String: " + ''.join(msg)
     finally:
         pass
     print m
