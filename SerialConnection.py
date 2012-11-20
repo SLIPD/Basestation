@@ -18,6 +18,8 @@ class SerialConnection:
 		char = self.read(1)
 		while(char != '*'):
 			char = self.read(1)
+			print char,
+		print ""
 	
 	def read(self, numBytes=32):
 		try:
