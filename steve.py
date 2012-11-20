@@ -45,14 +45,12 @@ base_gps = None
 
 # Handle different sorts of messages from server
 def pair_recv(msg):
-    print "Received from Server"
+    print "Received from Server:"
     try:
         try:
             j = jsonapi.loads(''.join(msg))
         except TypeError:
             j = jsonapi.loads(msg)
-        
-        m = "JSON: " + str(j)
 
         if j['state'] == 'naming':
             assign_names(j['mapping'])
@@ -61,7 +59,6 @@ def pair_recv(msg):
             print "Command Stuff"
     finally:
         pass
-    print m
 
 # Translate GPS co-ords into game co-ordinates
 def loc_translate(gps_coords):
@@ -190,6 +187,7 @@ def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
 
 # Give names to all specks as messages
 def assign_names(names):
+    print names
     for speck_id in id_dict.values():
         try:
             assigned_name = names[str(speck_id)]
@@ -200,10 +198,11 @@ def assign_names(names):
         
         m = PayloadMessage()
         m.initialise(assigned_name)
-        create_and_send_packet(speck_id, 1, 3, 0, m.getBytes()) 
+        create_and_send_packet(speck_id, 1, 3, 0, m) 
 
 
 # Set the ball rolling...
+print "Saying hello to server..."
 command_stream.send_multipart(["PI"])
 command_stream.on_recv(setup_pair)
 
