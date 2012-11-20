@@ -11,6 +11,9 @@ from SocketConnection import SocketConnection
 from Packet import Packet
 from payload import *
 
+from geopy.point import Point
+from geopy.distance import distance
+
 import time
 
 if (len(argv) != 3):
@@ -28,7 +31,7 @@ pair_stream = None
 
 # Info to be filled in by server
 n_players = 0
-left_corner_of_area = (0.0,0.0)
+left_corner_of_area = None
 
 # ** PI to Mesh **
 mesh_listening_socket = None
@@ -62,6 +65,8 @@ def pair_recv(msg):
 
 # Translate GPS co-ords into game co-ordinates
 def loc_translate(gps_coords):
+    global left_corner_of_area
+    
     return [25,25,0]
 
 # Creates the paired port to the game server.
@@ -71,7 +76,7 @@ def setup_pair(msg):
     print "Reply Received. Port: " + str(new_port)
    
     n_players = int(n_devices)
-    left_corner_of_area = (zx, zy)
+    left_corner_of_area = Point(zx, zy)
     
     # Create a paired socket to communicate with server
     pair_socket = ctx.socket(socket.PAIR)
@@ -121,24 +126,32 @@ def send_init():
                 # Get the base station location packet
                 first_packet = Packet(mesh_listening_socket.receiveData())
                 first_payload = first_packet.getPayload()
-                base_gps = (first_payload.getLatitude(), first_payload.getLongitude(), first_payload.getElevation())
+                base_gps = Point(first_payload.getLatitude(), first_payload.getLongitude(), first_payload.getElevation())
                 print base_gps
                 
+                mesh_listening_socket.setTimeout(1.0)
+                                
                 # Assign addresses to the expected number of nodes
                 s_time = time.clock()
-                while (len(id_dict) < n_players) and (time.clock() < s_time+ 5):
-                    data = mesh_listening_socket.receiveData()
-                    packet = Packet(data)
-                    if packet.isIdentification():
-                        speck_id = packet.getPayload().getId()
+                while (time.clock() < s_time+ 5) and (len(id_dict) < n_players):
+                    print "Iteration of ID assigning"
+                    try:
+                        data = mesh_listening_socket.receiveData()
                         
-                        print "Id request from %s" % speck_id
-                        
-                        # Respond to all requests: packet may have dropped
-                        assign_address(speck_id)
-                        
-                        # Reset the start time so we wait from last receive
-                        s_time = time.clock()
+                        packet = Packet(data)
+                        if packet.isIdentification():
+                            speck_id = packet.getPayload().getId()
+                            
+                            print "Id request from %s" % speck_id
+                            
+                            # Respond to all requests: packet may have dropped
+                            assign_address(speck_id)
+                            
+                            # Reset the start time so we wait from last receive
+                            s_time = time.clock()
+                    except:
+                        print "no Data received. Retrying"
+                    
                 break
             # If creating sockets doesn't work, wait and try again
             else: 
