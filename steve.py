@@ -186,7 +186,10 @@ def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
 # Give names to all specks as messages
 def assign_names(names):
     for speck_id in id_dict.values():
-        assigned_name = names[speck_id]
+        try:
+            assigned_name = names[str(speck_id)]
+        except KeyError:
+            print "No name found for speck with ID %d" % speck_id
         
         print "Giving name {0} to speck {1}".format(assigned_name, speck_id)
         
