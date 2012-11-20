@@ -189,6 +189,31 @@ class PayloadMessage(object):
         
     def __str__(self):
         if(self.encrypted):
-            return "HEX: " + self.b64.printHexString(self.message)
+            return "HEX: " + self.b64.getHexString(self.message)
         else:
             return "(message) = (" + str(self.message) + ")"
+            
+    
+    def appendDebugMessage(self, debug):
+        self.decryptMessage()
+        self.message += "$" + debug
+    
+    def getPingMessage(self):
+        return "Ping"
+    
+    def getPongMessage(self):
+        return "Pong"
+        
+    def getEnableDebugMessage(self):
+        return "EDebug"
+    
+    def getDisableDebugMessage(self):
+        return "DDebug"
+        
+    def getOutOfRangeMessage(self):
+        return "OOR"
+    
+    
+    
+    
+                

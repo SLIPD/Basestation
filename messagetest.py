@@ -22,6 +22,7 @@ tests = []
 for i in range(1,1000):
     tests.append(fakeMessage())
 
+'''
 for test in tests:
     m = PayloadMessage()
     m.initialise(test)
@@ -31,4 +32,14 @@ for test in tests:
         print "        " + m.__str__()
         print "RETURN: (message) = (" + test + ")"
 print "Tests complete"
+'''
+m = PayloadMessage()
+m.initialise("hello")
+m.appendDebugMessage(m.getPingMessage())
+print "Appended"
+m.encryptMessage()
+print "Encrypted"
+print m
+m.decryptMessage()
+print m
         

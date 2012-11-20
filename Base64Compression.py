@@ -38,6 +38,13 @@ class Base64Compression:
             if(current == 0):
                 return byteNum;
     
+    def getHexString(self,string):
+        output = ""
+        stringLen = len(string);
+        for i in range(0,stringLen):
+            output += "%.2X " % string[i]
+        return output
+    
     def printHexString(self,string):
         stringLen = len(string);
         for i in range(0,stringLen):
