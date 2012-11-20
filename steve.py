@@ -35,7 +35,7 @@ mesh_listening_socket = None
 mesh_sending_socket = None
 
 # Address to give to speck next
-currentFreeAddress = 1
+current_free_address = 1
 
 # Stores the ID of the specks as {speckID : assignedAddress}
 id_dict = dict()
@@ -89,12 +89,12 @@ def setup_pair(msg):
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
-    global n_players, pair_stream
+    global current_free_address, n_players, pair_stream
     
     # Add dummy adresses for expected number of players
     for i in range(0, n_players):
-        id_dict[i] = currentFreeAddress
-        currentFreeAddress += 1
+        id_dict[i] = current_free_address
+        current_free_address += 1
     ids_to_send = [str(item) for item in id_dict.values()]
     
     base_location = loc_translate((0,0,0))
@@ -159,15 +159,15 @@ def send_init():
 
 # Assign an address from the next free address
 def assign_address(speck_id):
-    global currentFreeAddress
+    global current_free_address
     payload = PayloadIdentification()
     
     # Only assign an address if we don't have one yet, else send it again. 
     if not speck_id in id_dict:
-        id_dict[speck_id] = currentFreeAddress
-        print "Speck {0} has now been given address {1}".format(speck_id, currentFreeAddress)
-        payload.initialise(speck_id, currentFreeAddress)
-        currentFreeAddress += 1
+        id_dict[speck_id] = current_free_address
+        print "Speck {0} has now been given address {1}".format(speck_id, current_free_address)
+        payload.initialise(speck_id, current_free_address)
+        current_free_address += 1
     else:
         print "Speck %s has already been identified" % speck_id
         payload.initialise(speck_id, id_dict[speck_id])
