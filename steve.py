@@ -181,7 +181,10 @@ def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
     print "Creating and Sending: "
     print p
     global mesh_sending_socket
-    mesh_sending_socket.sendData(p.getBytes())
+    try:
+        mesh_sending_socket.sendData(p.getBytes())
+    except:
+        print "A connection error happened. Are you simulating the mesh?"
 
 # Give names to all specks as messages
 def assign_names(names):
@@ -195,8 +198,7 @@ def assign_names(names):
         
         m = PayloadMessage()
         m.initialise(assigned_name)
-        m.getBytes()
-        create_and_send_packet(speck_id, 1, 3, 0, m) 
+        create_and_send_packet(speck_id, 1, 3, 0, m.getBytes()) 
 
 
 # Set the ball rolling...
