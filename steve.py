@@ -1,3 +1,7 @@
+# Facilitates communications from mesh to server
+# Sets up mesh by assigning addresses.
+# SLIP Group D, Steven Eardley s0934142
+
 from zmq.core import context, socket
 from zmq.eventloop import zmqstream
 from zmq.utils import jsonapi
@@ -39,12 +43,7 @@ id_dict = dict()
 # The GPS location of the base station
 base_gps = None
 
-# Set the ball rolling...
-command_stream.send_multipart(["PI"])
-command_stream.on_recv(setup_pair)
-
-command_stream.io_loop.start()
-
+# Handle different sorts of messages from server
 def pair_recv(msg):
     print "Received from Server"
     try:
@@ -195,4 +194,11 @@ def assign_names(names):
         m = PayloadMessage()
         m.initialise(assigned_name)
         m.getBytes()
-        create_and_send_packet(speck_id,1,3,0,m) 
+        create_and_send_packet(speck_id, 1, 3, 0, m) 
+
+
+# Set the ball rolling...
+command_stream.send_multipart(["PI"])
+command_stream.on_recv(setup_pair)
+
+command_stream.io_loop.start()
