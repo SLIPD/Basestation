@@ -80,8 +80,8 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-    #send_init()
-    send_init_no_mesh()
+    send_init()
+    #send_init_no_mesh()
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
@@ -119,7 +119,7 @@ def send_init():
                 mesh_sending_socket.sendData('*')
                 
                 # Get the base station location packet
-                first_packet = Patcket(mesh_listening_socket.receiveData())
+                first_packet = Packet(mesh_listening_socket.receiveData())
                 first_payload = first_packet.getPayload()
                 base_gps = (first_payload.getLatitude(), first_payload.getLongitude(), first_payload.getElevation())
                 print base_gps
