@@ -153,7 +153,7 @@ class PayloadMessage(object):
     def getBytes(self):
         self.encryptMessage()
         print self
-        return pack('26s', self.message)
+        return self.message
     
     def getPaddedBytes(self):
         return padTo26(self.getBytes())
