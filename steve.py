@@ -90,7 +90,7 @@ def setup_pair(msg):
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
-    global n_players
+    global n_players, pair_stream
     
     # Add dummy adresses for expected number of players
     for i in range(0, n_players):
