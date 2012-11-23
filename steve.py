@@ -66,8 +66,25 @@ def pair_recv(msg):
 # Translate GPS co-ords into game co-ordinates
 def loc_translate(gps_coords):
     global left_corner_of_area
+    (l1, l2) = left_corner_of_area
+    (x, y, z) = gps_coords
     
-    return [25,25,0]
+    #Latitude: 1 deg = 110.54 km
+        
+    #Longitude: 1 deg = 111.320*cos(latitude) km
+    
+    xCoord = distance(l1,x).m / 2.5
+    yCoord = distance(l2,y).m / 2.5
+    zCoord = distance(0,z).m / 2.5
+    return [xCoord, yCoord, zCoord]
+
+def game_to_gps(game_coords):
+    global left_corner_of_area
+    
+    # The game co-ordinates are number of 2.5m squares from the left_corner_of_area
+    [x, y, z] = game_coords
+    
+    
 
 # Creates the paired port to the game server.
 def setup_pair(msg):
