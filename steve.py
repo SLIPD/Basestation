@@ -133,7 +133,7 @@ def send_init():
                                 
                 # Assign addresses to the expected number of nodes
                 s_time = time.clock()
-                while (time.clock() < s_time+ 5) and (len(id_dict) < n_players):
+                while (time.clock() < s_time+ 5):# and (len(id_dict) < n_players):
                     print "Iteration of ID assigning"
                     try:
                         data = mesh_listening_socket.receiveData()
