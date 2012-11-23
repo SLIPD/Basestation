@@ -86,6 +86,8 @@ def game_to_location(game_coords):
     # Latitude: 1 deg = 110540 m
     
     newlat =  (float(x) * 2.5) / float(110540) + left_corner_of_area[0]
+
+    #TODO: test using this latitude for longitude (or systematic errors)
     
     # Longitude: 1 deg = 111320 * cos(latitude) m
     newlon =  (float(y) * 2.5) / (float(111320) * cos(left_corner_of_area[0])) + left_corner_of_area[1]
