@@ -132,8 +132,8 @@ def send_init():
                 mesh_listening_socket.setTimeout(1.0)
                                 
                 # Assign addresses to the expected number of nodes
-                s_time = time.clock()
-                while (time.clock() < s_time+ 5):# and (len(id_dict) < n_players):
+                s_time = time.time()
+                while (time.time() < s_time + 5) and (len(id_dict) < n_players):
                     print "Iteration of ID assigning"
                     try:
                         data = mesh_listening_socket.receiveData()
@@ -148,7 +148,7 @@ def send_init():
                             assign_address(speck_id)
                             
                             # Reset the start time so we wait from last receive
-                            s_time = time.clock()
+                            s_time = time.time()
                     except:
                         print "no Data received. Retrying"
                     
