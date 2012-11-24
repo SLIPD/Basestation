@@ -18,8 +18,10 @@ from geopy.distance import distance
 import time
 
 if (len(argv) != 3):
+    argv[1] = "127.0.0.1"
+    argv[2] = "31415"
     print "Invalid number of arguments. Usage: steve.py host port"
-    exit()
+    print "Continuing with default of 127.0.0.1:31415"
 
 # ** PI to Server **
 ctx = context.Context.instance()
