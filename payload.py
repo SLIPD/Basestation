@@ -7,9 +7,9 @@ def padTo26(data):
     return (str(data) + nulls)[:26]
 
 PayloadIdentificationType = 0x00
-PayloadNodePositionType =     0x01
-PayloadWaypointType =         0x02
-PayloadMessageType =         0x03
+PayloadNodePositionType =   0x01
+PayloadWaypointType =       0x02
+PayloadMessageType =        0x03
 
 
 '''PayloadNodePosition holds the position of nodes'''
@@ -23,7 +23,9 @@ class PayloadNodePosition(object):
     def __init__(self,data=None):
         if(data != None):
             payload = data[:12]
-            self.latitude,self.longitude,self.elevation,self.hexaseconds = unpack('IIHH',payload)
+            self.latitude,self.longitude,self.elevation,self.hexaseconds = unpack('iihH',payload)
+            self.latitude = self.latitude / 10000
+            self.longitude = self.longitude / 10000
             
     def initialise(self, latitude, longitude, elevation, hexaseconds):
         self.latitude = latitude
@@ -35,7 +37,7 @@ class PayloadNodePosition(object):
         return 0x01
     
     def getBytes(self):
-        return pack('IIHH', self.latitude, self.longitude, self.elevation, self.hexaseconds)
+        return pack('iihH', self.latitude*10000, self.longitude*10000, self.elevation, self.hexaseconds)
         
     def getPaddedBytes(self):
         return padTo26(self.getBytes())
@@ -123,12 +125,17 @@ class PayloadWaypoint(object):
 class PayloadIdentification(object):
     
     id = None
+    tdma_gp = 500
+    tdma_txp = 3000
+    tdma_txp_p = 300
     nodeId = None
+    nc = 8 
+    c = 102
     
     def __init__(self,data=None):
         if(data != None):
-            payload = data[:9]
-            self.id, self.nodeId = unpack('QB',payload)
+            payload = data[:23]
+            self.id, self.tdma_gp, self.tdma_txp, self.tdma_txp_p, self.nodeId, self.nc, self.c = unpack('QLLLBBB',payload)
             
     def initialise(self, id, nodeId):
         self.id = id
@@ -138,7 +145,7 @@ class PayloadIdentification(object):
         return 0x00
         
     def getBytes(self):
-        return pack('QB', self.id, self.nodeId)
+        return pack('QLLLBBB', self.id, self.tdma_gp, self.tdma_txp, self.tdma_txp_p, self.nodeId, self.nc, self.c)
     
     def getPaddedBytes(self):
         return padTo26(self.getBytes())
@@ -150,7 +157,7 @@ class PayloadIdentification(object):
         return self.nodeId
         
     def __str__(self):
-        return "(id,nodeId) = (0x%X,%s)" % (self.id, self.nodeId)
+        return "(id,tdma_gp,tdma_txp,tdma_txp_p,nodeId,nc,c) = (0x%X,%d,%d,%d,%d,%d,%d)" % (self.id, self.tdma_gp, self.tdma_txp, self.tdma_txp_p, self.nodeId, self.nc, self.c)
 
 
 '''PayloadMessage is used for sending messages back and forth'''
@@ -235,8 +242,3 @@ class PayloadMessage(object):
         
     def getOutOfRangeMessage(self):
         return "OOR"
-    
-    
-    
-    
-                
