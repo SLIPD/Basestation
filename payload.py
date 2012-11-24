@@ -28,8 +28,8 @@ class PayloadNodePosition(object):
             self.longitude = self.longitude / 10000
             
     def initialise(self, latitude, longitude, elevation, hexaseconds):
-        self.latitude = latitude
-        self.longitude = longitude
+        self.latitude = fromDecimalDegrees(latitude)
+        self.longitude = fromDecimalDegrees(longitude)
         self.elevation = elevation
         self.hexaseconds = hexaseconds
     
@@ -54,6 +54,12 @@ class PayloadNodePosition(object):
     def getHexaseconds(self):
         return self.hexaseconds
     
+    def getDectLat(self):
+        return toDecimalDegrees(self.latitude)
+    
+    def getDecLon(self):
+        return toDecimalDegrees(self.longitude)
+        
     def toDecimalDegrees(self, nmea):
         """
         Converts an nmea float from ddmm.mmmm or dddmm.mmmm format
