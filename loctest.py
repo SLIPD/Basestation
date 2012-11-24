@@ -4,7 +4,7 @@ from geopy.point import Point
 from geopy.distance import distance
 
 left_corner_of_area = (55.943721, -3.175135)
-
+print Point(left_corner_of_area)
 # Translate GPS co-ords into game co-ordinates
 def loc_translate(gps_coords):
     global left_corner_of_area
@@ -20,7 +20,7 @@ def loc_translate(gps_coords):
 
 def game_to_location(game_coords):
     global left_corner_of_area
-    print Point(left_corner_of_area)
+
     # The game co-ordinates are number of 2.5m squares from the left_corner_of_area
     [x, y, z] = game_coords
 

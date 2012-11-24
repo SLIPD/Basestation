@@ -68,12 +68,12 @@ def pair_recv(msg):
 def loc_translate(gps_coords):
     global left_corner_of_area
     (l1, l2, l3) = left_corner_of_area
-    (x, y, z) = gps_coords
+    (y, x, z) = gps_coords
     
     #TODO: how does elev data come out of mesh?
     
-    xCoord = distance(l1, x).m / 2.5
-    yCoord = distance(l2, y).m / 2.5
+    xCoord = distance(l2, x).m / 2.5
+    yCoord = distance(l1, y).m / 2.5
     zCoord = distance(l3, z).m / 2.5
     return [xCoord, yCoord, zCoord]
 
