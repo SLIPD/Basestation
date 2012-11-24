@@ -42,10 +42,10 @@ class PayloadNodePosition(object):
     def getPaddedBytes(self):
         return padTo26(self.getBytes())
     
-    def getLatitude(self):
+    def getNmeaLatitude(self):
         return self.latitude
         
-    def getLongitude(self):
+    def getNmeaLongitude(self):
         return self.longitude
         
     def getElevation(self):
