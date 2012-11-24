@@ -54,7 +54,7 @@ class PayloadNodePosition(object):
     def getHexaseconds(self):
         return self.hexaseconds
     
-    def getDectLat(self):
+    def getDecLat(self):
         return toDecimalDegrees(self.latitude)
     
     def getDecLon(self):
