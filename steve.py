@@ -165,7 +165,7 @@ def send_init():
                 # Assign addresses to the expected number of nodes
                 s_time = time.time()
                 while (time.time() < s_time + 20) and (len(id_dict) < n_players):
-                    print "Time remaining: " + str(s_time + 20 - time.time())
+                    print "Time remaining: " + str(int(s_time + 20 - time.time() + 0.5))
                     try:
                         data = mesh_listening_socket.receiveData()
                         
