@@ -1,5 +1,6 @@
 from struct import *
 from Base64Compression import Base64Compression
+from string import find
 
 def padTo26(data):
     nulls = ''.join(['\0']*26)
@@ -52,7 +53,28 @@ class PayloadNodePosition(object):
     
     def getHexaseconds(self):
         return self.hexaseconds
-        
+    
+    def toDecimalDegrees(nmea):
+        """
+        Converts an nmea float from ddmm.mmmm or dddmm.mmmm format
+        to a float in dd.dddddd format
+        """
+        ddmm = str(nmea)
+        splitat = find(ddmm, '.') - 2
+        try:
+            return float(ddmm[:splitat]) + float(ddmm[splitat:]) / 60.0
+        except TypeError:
+            return None
+
+    def fromDecimalDegrees(dec):
+        # Do the reverse from above
+        dddd = str(dec)
+        splitat = find(dddd, '.')
+        try:
+            return float(dddd[:splitat] + str(float(dddd[splitat:]) * 60.0))
+        except TypeError:
+            return None
+    
     def __str__(self):
         return "(lat,long,elevation,hexaseconds) = (" + str(self.latitude) + "," + str(self.longitude) + "," + str(self.elevation) + "," + str(self.hexaseconds) + ")"
 
