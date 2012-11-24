@@ -29,6 +29,7 @@ def isNulls(data):
 	return True
 	
 def getInput():
+	global printNulls
 	try:
 		print "Waiting for input socket connection"
 		listeningSocket = SocketConnection('',29877)
@@ -43,7 +44,11 @@ def getInput():
 					if data == '*':
 						print "Received ready message"
 						isReady = True
+						threading.Thread(target = starTimeouter).start()
 						break
+					else:
+					    if printNulls:
+					        print data.encode('hex_codec'),
 			
 			while True:
 				data = listeningSocket.receiveData(32)
@@ -56,12 +61,29 @@ def getInput():
 		pass
 	finally:
 		listeningSocket.close()
+		
 
+def getKeys():
+	global printNulls
+	while True:
+		k = raw_input()
+		printNulls = not printNulls
+
+def starTimeouter():
+	global sendStars
+	startTime = time.time()
+	while sendStars:
+		if(time.time() - startTime > 1):
+			startTime = time.time()
+			print "Sending Star"
+			serial.write('*');
 
 
 try:
 	databuffer = []
 	isReady = False
+	printNulls = True
+	sendStars = True
 	
 	serial = SerialConnection()
 	print "Serial created"
@@ -76,6 +98,7 @@ try:
 	if(socketConnection.connectAsSender()):
 		threading.Thread(target = sendLoop).start()
 		threading.Thread(target = getInput).start()
+		threading.Thread(target = getKeys).start()
 		
 		print 'Thread started'
 		
@@ -87,6 +110,8 @@ try:
 		
 		print "Removing nulls"
 		serial.removeInitialNulls()
+		sendStars = False
+		
 		print "NULLS REMOVED"
 		
 		databuffer.append('\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
