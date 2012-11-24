@@ -68,35 +68,35 @@ def pair_recv(msg):
 # Translate GPS co-ords into game co-ordinates
 def loc_translate(gps_coords):
     global left_corner_of_area
-    (l1, l2, l3) = left_corner_of_area
+    (lat, long, elev) = left_corner_of_area
     (y, x, z) = gps_coords
     
     #TODO: how does elev data come out of mesh?
     
-    xCoord = distance(l2, x).m / 2.5
-    yCoord = distance(l1, y).m / 2.5
-    zCoord = distance(l3, z).m / 2.5
+    yCoord = round(distance((lat,0), (y,0)).m / 2.5)
+    xCoord = round(distance((lat,long), (lat,x)).m / 2.5)
+    
+    zCoord = (elev - z) / 2.5
     return [xCoord, yCoord, zCoord]
 
 def game_to_location(game_coords):
     global left_corner_of_area
+    (lat, long, elev) = left_corner_of_area
     
     # The game co-ordinates are number of 2.5m squares from the left_corner_of_area
-    [x, y, z] = game_coords
+    [y, x, z] = game_coords
     
-    # Latitude: 1 deg = 110540 m
-    
-    newlat =  (float(x) * 2.5) / float(110540) + left_corner_of_area[0]
+    # latDist is the m distance of a degree latitude
+    latDist = distance((lat,0), (lat + 1,0)).m
+    newlat =  ((x * 2.5) / latDist) + lat
+    # lonDist is the m distance of a degree longitude
+    lonDist = distance((newlat, long), (newlat, long + 1)).m
+    newlon =  (y * 2.5) / lonDist + long
 
-    #TODO: test using this latitude for longitude (or systematic errors)
-    
-    # Longitude: 1 deg = 111320 * cos(latitude) m
-    newlon =  (float(y) * 2.5) / (float(111320) * cos(left_corner_of_area[0])) + left_corner_of_area[1]
-    
     #TODO: Handle elevation
-    elev = (z * 2.5)
+    newelev = (z * 2.5) + elev
 
-    return Point(newlat, newlon, elev)
+    return (newlat, newlon, newelev)
     
 
 # Creates the paired port to the game server.
