@@ -52,7 +52,7 @@ class PayloadNodePosition(object):
     def getHexaseconds(self):
         return self.hexaseconds
     
-    def toDecimalDegrees(nmea):
+    def toDecimalDegrees(self, nmea):
         """
         Converts an nmea float from ddmm.mmmm or dddmm.mmmm format
         to a float in dd.dddddd format
@@ -64,7 +64,7 @@ class PayloadNodePosition(object):
         except TypeError:
             return None
 
-    def fromDecimalDegrees(dec):
+    def fromDecimalDegrees(self, dec):
         # Do the reverse from above
         dddd = str(dec)
         splitat = find(dddd, '.')
