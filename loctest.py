@@ -20,10 +20,11 @@ def loc_translate(gps_coords):
 
 def game_to_location(game_coords):
     global left_corner_of_area
-
+    print Point(left_corner_of_area)
     # The game co-ordinates are number of 2.5m squares from the left_corner_of_area
     [x, y, z] = game_coords
 
+    #latDist = distance(
     # Latitude: 1 deg = 110540 m
 
     newlat =  (float(x) * 2.5) / float(110540) + left_corner_of_area[0]
@@ -40,4 +41,3 @@ print loc_translate((55.943721, -3.175135, 0))
 print loc_translate((55.948960, -3.175999, 0))
 
 print game_to_location([233, 38, 0])
-print cos(0.5)
