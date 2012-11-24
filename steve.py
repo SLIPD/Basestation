@@ -67,14 +67,14 @@ def pair_recv(msg):
 # Translate GPS co-ords into game co-ordinates
 def loc_translate(gps_coords):
     global left_corner_of_area
-    (l1, l2) = left_corner_of_area
+    (l1, l2, l3) = left_corner_of_area
     (x, y, z) = gps_coords
     
     #TODO: how does elev data come out of mesh?
     
     xCoord = distance(l1, x).m / 2.5
     yCoord = distance(l2, y).m / 2.5
-    zCoord = distance(0, z).m / 2.5
+    zCoord = distance(l3, z).m / 2.5
     return [xCoord, yCoord, zCoord]
 
 def game_to_location(game_coords):
@@ -156,14 +156,14 @@ def send_init():
                 first_packet = Packet(mesh_listening_socket.receiveData())
                 first_payload = first_packet.getPayload()
                 base_gps = Point(first_payload.getLatitude(), first_payload.getLongitude(), first_payload.getElevation())
-                print base_gps
+                print "Base GPS: " + str(base_gps)
                 
                 mesh_listening_socket.setTimeout(1.0)
                                 
                 # Assign addresses to the expected number of nodes
                 s_time = time.time()
-                while (time.time() < s_time + 5) and (len(id_dict) < n_players):
-                    print "Iteration of ID assigning"
+                while (time.time() < s_time + 20) and (len(id_dict) < n_players):
+                    print "Time remaining: " + str(s_time + 20 - time.time())
                     try:
                         data = mesh_listening_socket.receiveData()
                         
@@ -179,7 +179,7 @@ def send_init():
                             # Reset the start time so we wait from last receive
                             s_time = time.time()
                     except:
-                        print "no Data received. Retrying"
+                        print "No Data received. Retrying"
                     
                 break
             # If creating sockets doesn't work, wait and try again
