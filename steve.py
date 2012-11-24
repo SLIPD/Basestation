@@ -18,8 +18,10 @@ from geopy.distance import distance
 import time
 
 if (len(argv) != 3):
+    argv[1] = "127.0.0.1"
+    argv[2] = "31415"
     print "Invalid number of arguments. Usage: steve.py host port"
-    exit()
+    print "Continuing with default of 127.0.0.1:31415"
 
 # ** PI to Server **
 ctx = context.Context.instance()
@@ -163,7 +165,7 @@ def send_init():
                 # Assign addresses to the expected number of nodes
                 s_time = time.time()
                 while (time.time() < s_time + 20) and (len(id_dict) < n_players):
-                    print "Time remaining: " + str(s_time + 20 - time.time())
+                    print "Time remaining: " + str(int(s_time + 20 - time.time() + 0.5))
                     try:
                         data = mesh_listening_socket.receiveData()
                         
