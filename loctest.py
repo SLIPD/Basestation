@@ -3,43 +3,52 @@ from math import cos
 from geopy.point import Point
 from geopy.distance import distance
 
-left_corner_of_area = Point(55.943721, -3.175135)
+origin = (55.943721, -3.175135, 0)
+left_corner_of_area = Point(origin[0], origin[1])
 
 # Translate GPS co-ords into game co-ordinates
 def loc_translate(gps_coords):
     global left_corner_of_area
-    (l1, l2, l3) = left_corner_of_area
+    (lat, long, elev) = left_corner_of_area
     (y, x, z) = gps_coords
-
+    
     #TODO: how does elev data come out of mesh?
-
-    xCoord = distance(l2, x).m / 2.5
-    yCoord = distance(l1, y).m / 2.5
-    zCoord = distance(l3, z).m / 2.5
+    
+    yCoord = round(distance((lat,0), (y,0)).m / 2.5)
+    xCoord = round(distance((lat,long), (lat,x)).m / 2.5)
+    
+    zCoord = (elev - z) / 2.5
     return [xCoord, yCoord, zCoord]
 
 def game_to_location(game_coords):
     global left_corner_of_area
-    (l1, l2, l3) = left_corner_of_area
+    (lat, long, elev) = left_corner_of_area
     
     # The game co-ordinates are number of 2.5m squares from the left_corner_of_area
-    [x, y, z] = game_coords
+    [y, x, z] = game_coords
     
     # latDist is the m distance of a degree latitude
-    latDist = distance(l1, l1 + 1).m
-    newlat =  (x * 2.5) / latDist + l1
-
+    latDist = distance((lat,0), (lat + 1,0)).m
+    newlat =  ((x * 2.5) / latDist) + lat
     # lonDist is the m distance of a degree longitude
-    lonDist = distance((l1, l2), (l1, l2 + 1)).m
-    newlon =  (y * 2.5) / lonDist + l2
+    lonDist = distance((newlat, long), (newlat, long + 1)).m
+    newlon =  (y * 2.5) / lonDist + long
 
     #TODO: Handle elevation
-    elev = (z * 2.5)
+    newelev = (z * 2.5) + elev
 
-    return (newlat, newlon, elev)
+    return (newlat, newlon, newelev)
 
-print loc_translate((55.943721, -3.175135, 0))
-print distance(game_to_location(loc_translate((55.943721, -3.175135, 0))), (55.948960, -3.175999, 0)).m
 
-print game_to_location(loc_translate((55.948960, -3.175999, 0)))
-print distance(game_to_location(loc_translate((55.948960, -3.175999, 0))), (55.948960, -3.175999, 0)).m
+#p = (origin[0] + 0.001, origin[1] + 0.001, 0)
+p = (origin[0] + 1, origin[1],0)
+
+print origin
+print loc_translate(origin)
+print game_to_location(loc_translate(origin))
+print distance(game_to_location(loc_translate(origin)), origin).m
+print ""
+print "old p: " + str(p)
+print "p -> game coordinate: " + str(loc_translate(p))
+print "new p: " + str(game_to_location(loc_translate(p)))
+print "distance from above to p: " + str(distance(game_to_location(loc_translate(p)), p).m)
