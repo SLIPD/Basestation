@@ -1,6 +1,7 @@
 from struct import *
 from Base64Compression import Base64Compression
 from string import find
+from math import *
 
 def padTo26(data):
     nulls = ''.join(['\0']*26)
@@ -28,8 +29,8 @@ class PayloadNodePosition(object):
             self.longitude = self.longitude / 10000
             
     def initialise(self, latitude, longitude, elevation, hexaseconds):
-        self.latitude = fromDecimalDegrees(latitude)
-        self.longitude = fromDecimalDegrees(longitude)
+        self.latitude = self.fromDecimalDegrees(latitude)
+        self.longitude = self.fromDecimalDegrees(longitude)
         self.elevation = elevation
         self.hexaseconds = hexaseconds
     
@@ -60,47 +61,35 @@ class PayloadNodePosition(object):
     def getDecimalLongitude(self):
         return self.toDecimalDegrees(self.longitude)
         
-    def toDecimalDegrees(nmea):
-        """
-        Converts a string from ddmm.mmmm or dddmm.mmmm format
-        to a float in dd.dddddd format
-        """
-        negative = 1
-        if nmea < 0:
-            nmea = nmea * (-1)
-            negative = -1
-        ddmm = str(nmea)
-        splitat = find(ddmm, '.') - 2
-        try:
-            return (float(ddmm[:splitat]) + float(ddmm[splitat:]) / 60.0) * negative
-        except TypeError:
+    def toDecimalDegrees(self,nmea):
+        neg = False
+        nmea = str(nmea)
+        if nmea[0] == '-':
+            nmea = nmea[1:]
+            neg = True
+        pointPos = find(nmea,'.')
+        if(find == -1):
             return None
+        longitude = False
+        if pointPos == 5:
+            longitude = True
+        value = float(nmea) / 100
+        integer = floor(value)
+        decimal = (value - integer) * (100.0/60.0)
+        total = integer + decimal
+        if neg:
+            total = -total
+        return total
 
-    def fromDecimalDegrees(dec):
-        # Do the reverse from above
-        negative = False
-        addzero = False
-        dddd = str(dec)
-        
+    def fromDecimalDegrees(self,dec):
+        neg = False
         if dec < 0:
-            negative = True
-            dddd = dddd[1:]
-        
-        splitat = find(dddd, '.')
-        if splitat == 1:
-            addzero = True
-
-        try:
-            if addzero:
-                nmeaString = dddd[:splitat] + '0' + str(float(dddd[splitat:]) * 60.0)
-            else:
-                nmeaString = dddd[:splitat] + str(float(dddd[splitat:]) * 60.0)
-            if negative:
-                nmeaString = '-' + nmeaString
-            print nmeaString
-            return float(nmeaString)
-        except TypeError:
-            return None
+            neg = True
+            dec = -dec
+        value = (floor(dec) + ((dec - floor(dec)) * (60.0/100.0))) * 100
+        if neg:
+            value = -value
+        return value
     
     def printNmeaPosition(self):
         print str((self.getNmeaLatitude(),self.getNmeaLongitude()))

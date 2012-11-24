@@ -80,7 +80,6 @@ def loc_translate(gps_coords):
     
     yCoord = round(distance((lat,0), (y,0)).m / 2.5)
     xCoord = round(distance((lat,long), (lat,x)).m / 2.5)
-    
     zCoord = (elev - z) / 2.5
     return [xCoord, yCoord, zCoord]
 
@@ -169,7 +168,7 @@ def send_init():
                                 
                 # Assign addresses to the expected number of nodes
                 s_time = time.time()
-                while (time.time() < s_time + 20) and (len(id_dict) < n_players):
+                while (time.time() < s_time + 20) or (len(id_dict) < n_players):
                     print "Time remaining: " + str(int(s_time + 20 - time.time() + 0.5))
                     try:
                         data = mesh_listening_socket.receiveData()
@@ -182,9 +181,10 @@ def send_init():
                             
                             # Respond to all requests: packet may have dropped
                             assign_address(speck_id)
-                            
+                            print "Address assigned"
                             # Reset the start time so we wait from last receive
                             s_time = time.time()
+                            print "Time Reset"
                     except:
                         print "No Data received. Retrying"
                     
@@ -232,6 +232,7 @@ def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
     global mesh_sending_socket
     try:
         mesh_sending_socket.sendData(p.getBytes())
+        print "sent"
     except:
         print "A connection error happened. Are you simulating the mesh?"
 
