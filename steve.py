@@ -155,7 +155,7 @@ def send_init():
                 # Get the base station location packet
                 first_packet = Packet(mesh_listening_socket.receiveData())
                 first_payload = first_packet.getPayload()
-                base_gps = Point(first_payload.getDecLat(), first_payload.getDecLon(), first_payload.getElevation())
+                base_gps = Point(first_payload.getDecimalLatitude(), first_payload.getDecimalLongitude(), first_payload.getElevation())
                 print "Base GPS: " + str(base_gps)
                 
                 mesh_listening_socket.setTimeout(1.0)
