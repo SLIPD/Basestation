@@ -60,27 +60,47 @@ class PayloadNodePosition(object):
     def getDecimalLongitude(self):
         return self.toDecimalDegrees(self.longitude)
         
-    def toDecimalDegrees(self, nmea):
+    def toDecimalDegrees(nmea):
         """
-        Converts an nmea float from ddmm.mmmm or dddmm.mmmm format
+        Converts a string from ddmm.mmmm or dddmm.mmmm format
         to a float in dd.dddddd format
         """
+        negative = 1
+        if nmea < 0:
+            nmea = nmea * (-1)
+            negative = -1
         ddmm = str(nmea)
         splitat = find(ddmm, '.') - 2
-        if splitat == -1:
-            return float(ddmm)
-        else:
-            return float(ddmm[:splitat]) + float(ddmm[splitat:]) / 60.0
-            
+        try:
+            return (float(ddmm[:splitat]) + float(ddmm[splitat:]) / 60.0) * negative
+        except TypeError:
+            return None
 
-    def fromDecimalDegrees(self, dec):
+    def fromDecimalDegrees(dec):
         # Do the reverse from above
+        negative = False
+        addzero = False
         dddd = str(dec)
+        
+        if dec < 0:
+            negative = True
+            dddd = dddd[1:]
+        
         splitat = find(dddd, '.')
-        if splitat == -1:
-            return float(dddd)
-        else:
-            return float(dddd[:splitat] + str(float(dddd[splitat:]) * 60.0))
+        if splitat == 1:
+            addzero = True
+
+        try:
+            if addzero:
+                nmeaString = dddd[:splitat] + '0' + str(float(dddd[splitat:]) * 60.0)
+            else:
+                nmeaString = dddd[:splitat] + str(float(dddd[splitat:]) * 60.0)
+            if negative:
+                nmeaString = '-' + nmeaString
+            print nmeaString
+            return float(nmeaString)
+        except TypeError:
+            return None
     
     def printNmeaPosition(self):
         print str((self.getNmeaLatitude(),self.getNmeaLongitude()))
