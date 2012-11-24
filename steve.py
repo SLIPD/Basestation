@@ -61,8 +61,7 @@ def pair_recv(msg):
         if j['state'] == 'naming':
             assign_names(j['mapping'])
         elif j['state'] == 'commanding':
-            # Handle the commands
-            print "Command Stuff"
+            send_commands(j['commanding'])
     finally:
         pass
 
@@ -244,6 +243,16 @@ def assign_names(names):
         m.initialise(assigned_name)
         create_and_send_packet(speck_id, 1, 3, 0, m) 
 
+# Send command messages to specks
+def send_commands(commands):
+    print commands
+    for (speck_id, waypoints) in commands.items():
+        gps_waypoints = map(game_to_location, waypoints)
+        print gps_waypoints
+        
+        m = PayloadWaypoint()
+        m.initialise(0, gps_waypoints)
+        create_and_send_packet(speck_id, 1, 3, 0, m)
 
 # Set the ball rolling...
 print "Saying hello to server..."
