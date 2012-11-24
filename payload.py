@@ -82,8 +82,16 @@ class PayloadNodePosition(object):
         else:
             return float(dddd[:splitat] + str(float(dddd[splitat:]) * 60.0))
     
+    def printNmeaPosition(self):
+        print str((self.getNmeaLatitude(),self.getNmeaLongitude()))
+        
+    def printDecimalPosition(self):
+        print str((self.getDecimalLatitude(),self.getDecimalLongitude()))
+    
     def __str__(self):
-        return "(lat,long,elevation,hexaseconds) = (" + str(self.latitude) + "," + str(self.longitude) + "," + str(self.elevation) + "," + str(self.hexaseconds) + ")"
+        returnStr = "((decimallat,decimallong),elevation,hexaseconds) = (" + str((self.getDecimalLatitude(),self.getDecimalLongitude())) + "," + str(self.elevation) + "," + str(self.hexaseconds) + ")\n"
+        returnStr = returnStr + "((nmealat,nmealong),elevation,hexaseconds) = (" + str((self.getNmeaLatitude(),self.getNmeaLongitude())) + "," + str(self.elevation) + "," + str(self.hexaseconds) + ")"
+        return returnStr
 
 
 '''PayloadWaypoint holds a list of waypoints for the player to go to'''

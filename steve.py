@@ -17,16 +17,21 @@ from geopy.distance import distance
 
 import time
 
+ip = ""
+port = ""
 if (len(argv) != 3):
-    argv[1] = "127.0.0.1"
-    argv[2] = "31415"
+    ip = "127.0.0.1"
+    port = "31415"
     print "Invalid number of arguments. Usage: steve.py host port"
     print "Continuing with default of 127.0.0.1:31415"
+else:
+    ip = argv[1]
+    port = argv[2]
 
 # ** PI to Server **
 ctx = context.Context.instance()
 command_socket = ctx.socket(socket.REQ)
-command_socket.connect("tcp://{0}:{1}".format(argv[1], argv[2]))
+command_socket.connect("tcp://{0}:{1}".format(ip,port))
 
 command_stream = zmqstream.ZMQStream(command_socket)
 pair_socket = None
@@ -110,7 +115,7 @@ def setup_pair(msg):
     
     # Create a paired socket to communicate with server
     pair_socket = ctx.socket(socket.PAIR)
-    pair_socket.connect("tcp://{0}:{1}".format(argv[1], new_port))
+    pair_socket.connect("tcp://{0}:{1}".format(ip, new_port))
     pair_stream = zmqstream.ZMQStream(pair_socket, command_stream.io_loop)
     pair_stream.on_recv(pair_recv)
     
@@ -156,6 +161,7 @@ def send_init():
                 # Get the base station location packet
                 first_packet = Packet(mesh_listening_socket.receiveData())
                 first_payload = first_packet.getPayload()
+                print first_payload
                 base_gps = Point(first_payload.getDecimalLatitude(), first_payload.getDecimalLongitude(), first_payload.getElevation())
                 print "Base GPS: " + str(base_gps)
                 
@@ -196,6 +202,7 @@ def send_init():
     
     # Send the itialisation message to the server
     initMessage = {"state": "init", "base_location": base_location,"device_ids": ids_to_send}
+    print "INIT MESSAGE: " + str(initMessage)
     pair_stream.send_json(initMessage)
 
 # Assign an address from the next free address
