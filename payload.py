@@ -55,10 +55,10 @@ class PayloadNodePosition(object):
         return self.hexaseconds
     
     def getDecLat(self):
-        return toDecimalDegrees(self.latitude)
+        return self.toDecimalDegrees(self.latitude)
     
     def getDecLon(self):
-        return toDecimalDegrees(self.longitude)
+        return self.toDecimalDegrees(self.longitude)
         
     def toDecimalDegrees(self, nmea):
         """
