@@ -193,7 +193,8 @@ def send_init():
                             print "Time Reset"
                     except:
                         print "No Data received. Retrying"
-                    
+                
+                assign_basestation_tdma_info()  
                 break
             # If creating sockets doesn't work, wait and try again
             else: 
@@ -210,6 +211,12 @@ def send_init():
     initMessage = {"state": "init", "base_location": base_location,"device_ids": ids_to_send}
     print "INIT MESSAGE: " + str(initMessage)
     pair_stream.send_json(initMessage)
+
+#give the basestation its TDMA info
+def assign_basestation_tdma_info():
+    payload = PayloadIdentification()
+    payload.initialise(0,0)
+    create_and_send_packet(0x00,0x00,0x00,0x00,0x0000,payload)
 
 # Assign an address from the next free address
 def assign_address(speck_id):
