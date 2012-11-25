@@ -38,7 +38,13 @@ class SerialConnection:
 			self.connection.write(data)
 		except:
 			print "Exception: " + str(sys.exc_info()[0])
-			
+	
+	def flush(self):
+		try:
+			self.flush()
+		except:
+			print "Exception: " + str(sys.exc_info()[0])
+	
 	def close(self):
 		print "Closing connection..."
 		self.connection.close()

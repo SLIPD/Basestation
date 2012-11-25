@@ -158,7 +158,9 @@ def send_init():
                 mesh_sending_socket.sendData('*')
                 
                 # Get the base station location packet
-                first_packet = Packet(mesh_listening_socket.receiveData())
+                firstData = mesh_listening_socket.receiveData()
+                print "First Data: " + firstData.encode('hex_codec')
+                first_packet = Packet(firstData)
                 first_payload = first_packet.getPayload()
                 print first_payload
                 base_gps = Point(first_payload.getDecimalLatitude(), first_payload.getDecimalLongitude(), first_payload.getElevation())
@@ -168,7 +170,9 @@ def send_init():
                                 
                 # Assign addresses to the expected number of nodes
                 s_time = time.time()
-                while (time.time() < s_time + 20) or (len(id_dict) < n_players):
+                while (len(id_dict) <= n_players):
+                    if (time.time() > s_time + 20):
+                        break;
                     print "Time remaining: " + str(int(s_time + 20 - time.time() + 0.5))
                     try:
                         data = mesh_listening_socket.receiveData()
