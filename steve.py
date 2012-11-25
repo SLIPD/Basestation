@@ -16,6 +16,7 @@ from geopy.point import Point
 from geopy.distance import distance
 
 import time
+import threading
 
 ip = ""
 port = ""
@@ -65,6 +66,7 @@ def pair_recv(msg):
 
         if j['state'] == 'naming':
             assign_names(j['mapping'])
+            forward_from_mesh()
         elif j['state'] == 'commanding':
             send_commands(j['commanding'])
     finally:
@@ -266,9 +268,58 @@ def send_commands(commands):
         m.initialise(0, gps_waypoints)
         create_and_send_packet(speck_id, 1, 3, 0, m)
 
+def forward_from_mesh():
+    global mesh_listening_socket, pair_stream
+    forwarding_thread = MeshForwarder(mesh_listening_socket, pair_stream)
+    forwarding_thread.start()
+
+def shut_up_mesh():
+    forwarding_thread.stop()
+
+
 # Set the ball rolling...
 print "Saying hello to server..."
 command_stream.send_multipart(["PI"])
 command_stream.on_recv(setup_pair)
 
 command_stream.io_loop.start()
+
+class MeshForwarder (threading.Thread):
+    
+    def __init__(self, meshSocket, server_stream):
+        threading.Thread.__init__(self)
+        self.inSocket = mesh_socket
+        self.outStream = server_stream
+        self.stop_event = threading.Event()        
+
+    def stop(self):
+        if self.isAlive() == True:
+            # set event to signal thread to terminate
+            self.stop_event.set()
+            # block calling thread until thread really has terminated
+            self.join()
+
+    def run(self):
+        while self.stop_event.is_set() == False:
+            try:
+                data = mesh_listening_socket.receiveData()
+                        
+                packet = Packet(data)
+                sender = packet.getOriginId()
+                payload = packet.getPayload()
+                
+                if payload.getType == payload.PayloadNodePositionType:
+                    location = Point(payload.getDecimalLatitude(), payload.getDecimalLongitude(), payload.getElevation()) 
+                    print location
+                    game_coords = loc_translate(location)
+                    print game_coords
+                    
+                    message_to_server = { "state": "play", "updates": [str(sender), game_coords]] }
+                    
+                    print "MeshForwarder: LOCATION MESSAGE: " + str(message_to_server)
+                    server_stream.send_json(message_to_server)
+                except:
+                    print "MeshForwarder: No Data received from mesh. Waiting 1 sec."
+                    time.sleep(1)
+        
+        print "Mesh Forwarding thread stopped."
