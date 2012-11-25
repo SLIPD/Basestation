@@ -44,16 +44,13 @@ def getInput():
                     if data == '*':
                         print "Received ready message"
                         isReady = True
-                        threading.Thread(target = starTimeouter).start()
+                        #threading.Thread(target = starTimeouter).start()
                         break
-                    else:
-                        if printNulls:
-                            print data.encode('hex_codec'),
             
             while True:
                 data = listeningSocket.receiveData(32)
                 if(not isNulls(data)):
-                    print "Writing: " + data.encode('hex_codec')
+                    print "Write: " + data.encode('hex_codec')
                     serial.write(data)
         else:
             print "NO LISTENING CONNECTION"
@@ -61,25 +58,29 @@ def getInput():
         pass
     finally:
         listeningSocket.close()
-        
 
-def getKeys():
-    global printNulls
-    while True:
-        k = raw_input()
-        printNulls = not printNulls
 
 def starTimeouter():
     global sendStars
+    global fakePacket
     startTime = time.time()
     while sendStars:
         if(time.time() - startTime > 1):
             startTime = time.time()
-            print "Sending Star"
-            serial.write('*');
+            if fakePacket:
+                print "Sending Hash"
+                serial.write('#')
+            else:
+                print "Sending Star"
+                serial.write('*');
 
+
+print sys.argv
 
 try:
+    fakePacket = False
+    if len(sys.argv) == 2:
+        fakePacket = True
     databuffer = []
     isReady = False
     printNulls = True
@@ -98,7 +99,6 @@ try:
     if(socketConnection.connectAsSender()):
         threading.Thread(target = sendLoop).start()
         threading.Thread(target = getInput).start()
-        threading.Thread(target = getKeys).start()
         
         print 'Thread started'
         
@@ -106,23 +106,29 @@ try:
             time.sleep(0.1)
         
         print "Sending speck ready message"
-        serial.write('*')
+        
+        if fakePacket:
+            serial.write('#')
+            serial.flush()
+        else:
+            serial.write('*')
+            serial.flush()
         
         print "Removing nulls"
-        serial.removeInitialNulls()
+        #serial.removeInitialNulls()
+        print serial.read(1)
         sendStars = False
-        
         print "NULLS REMOVED"
         
+        if fakePacket:
+            print "Writing fake GPS packet"
+            serial.write('\x00\x00\x00\x01\x00\x00\x03\x4F\xE7\x3F\x00\x01\xE9\x36\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         
-        #55.946985N, -3.165084W
-        #0x034FE73F -> \x03\x4F\xE7\x3F\x00\x01\xE9\x36
-        #0x0001E936 -> 
-        databuffer.append('\x00\x00\x00\x01\x00\x00\x03\x4F\xE7\x3F\x00\x01\xE9\x36\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        
         
         while True:
             data = serial.read(32)
-            print data.encode('hex_codec')
+            print "READ: " + str(data.encode('hex_codec'))
             databuffer.append(data)
         
         
