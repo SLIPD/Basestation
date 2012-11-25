@@ -5,8 +5,7 @@
 from zmq.core import context, socket
 from zmq.eventloop import zmqstream
 from zmq.utils import jsonapi
-from sys import argv, exit
-from math import cos
+from sys import argv
 
 from SocketConnection import SocketConnection
 from Packet import Packet
@@ -17,6 +16,58 @@ from geopy.distance import distance
 
 import time
 import threading
+
+# Thread for sending location co-ordinates from mesh to server
+# ... Sorry.
+class MeshForwarder (threading.Thread):
+    
+    def __init__(self, mesh_socket, server_stream):
+        threading.Thread.__init__(self)
+        self.inSocket = mesh_socket
+        self.outStream = server_stream
+        self.stop_event = threading.Event()        
+
+    def stop(self):
+        if self.isAlive() == True:
+            # set event to signal thread to terminate
+            self.stop_event.set()
+
+    def run(self):
+        wait_counter = 0
+        while self.stop_event.is_set() == False:
+            try:
+                data = mesh_listening_socket.receiveData()
+                
+                # If we get something, reset the counter
+                wait_counter = 0
+                
+                packet = Packet(data)
+                sender = packet.getOriginId()
+                payload = packet.getPayload()
+                
+                if payload.getType == payload.PayloadNodePositionType:
+                    location = Point(payload.getDecimalLatitude(), payload.getDecimalLongitude(), payload.getElevation()) 
+                    print location
+                    game_coords = loc_translate(location)
+                    print game_coords
+                    
+                    message_to_server = { "state": "play", "updates": [str(sender), game_coords] }
+                    
+                    print "MeshForwarder: LOCATION MESSAGE: " + str(message_to_server)
+                    server_stream.send_json(message_to_server)
+            except:
+                wait = 0.1
+                print "MeshForwarder: No Data received from mesh. Waiting %s sec." % wait
+                time.sleep(wait)
+
+                # Stop the thread if we waited for more than ten seconds
+                wait_counter += wait
+                if wait_counter > 10:
+                    print "No data in 10 seconds. Stopping."
+                    self.stop()
+        
+        print "Mesh Forwarding thread stopped."
+# End of MeshForwarder class
 
 ip = ""
 port = ""
@@ -121,8 +172,8 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-    send_init()
-    #send_init_no_mesh()
+    #send_init()
+    send_init_no_mesh()
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
@@ -136,7 +187,7 @@ def send_init_no_mesh():
         current_free_address += 1
     ids_to_send = [str(item) for item in id_dict.values()]
     
-    base_location = loc_translate((0,0,0))
+    base_location = loc_translate(left_corner_of_area)
     
     # Send the itialisation message to the server
     initMessage = {"state": "init", "base_location": base_location,"device_ids": ids_to_send}
@@ -194,6 +245,7 @@ def send_init():
                     except:
                         print "No Data received. Retrying"
                 
+                # Tell the nodes to start using TDMA
                 assign_basestation_tdma_info()  
                 break
             # If creating sockets doesn't work, wait and try again
@@ -212,7 +264,7 @@ def send_init():
     print "INIT MESSAGE: " + str(initMessage)
     pair_stream.send_json(initMessage)
 
-#give the basestation its TDMA info
+# Give the basestation its TDMA info
 def assign_basestation_tdma_info():
     payload = PayloadIdentification()
     payload.initialise(0,0)
@@ -290,43 +342,3 @@ command_stream.send_multipart(["PI"])
 command_stream.on_recv(setup_pair)
 
 command_stream.io_loop.start()
-
-class MeshForwarder (threading.Thread):
-    
-    def __init__(self, meshSocket, server_stream):
-        threading.Thread.__init__(self)
-        self.inSocket = mesh_socket
-        self.outStream = server_stream
-        self.stop_event = threading.Event()        
-
-    def stop(self):
-        if self.isAlive() == True:
-            # set event to signal thread to terminate
-            self.stop_event.set()
-            # block calling thread until thread really has terminated
-            self.join()
-
-    def run(self):
-        while self.stop_event.is_set() == False:
-            try:
-                data = mesh_listening_socket.receiveData()
-                        
-                packet = Packet(data)
-                sender = packet.getOriginId()
-                payload = packet.getPayload()
-                
-                if payload.getType == payload.PayloadNodePositionType:
-                    location = Point(payload.getDecimalLatitude(), payload.getDecimalLongitude(), payload.getElevation()) 
-                    print location
-                    game_coords = loc_translate(location)
-                    print game_coords
-                    
-                    message_to_server = { "state": "play", "updates": [str(sender), game_coords]] }
-                    
-                    print "MeshForwarder: LOCATION MESSAGE: " + str(message_to_server)
-                    server_stream.send_json(message_to_server)
-                except:
-                    print "MeshForwarder: No Data received from mesh. Waiting 1 sec."
-                    time.sleep(1)
-        
-        print "Mesh Forwarding thread stopped."
