@@ -61,6 +61,9 @@ class PayloadNodePosition(object):
     def getDecimalLongitude(self):
         return self.toDecimalDegrees(self.longitude)
         
+    def fixGooglesError(self, (lat,long)):
+        return (lat - 0.000037,long + 0.000037)
+    
     def toDecimalDegrees(self,nmea):
         neg = False
         nmea = str(nmea)
