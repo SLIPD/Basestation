@@ -74,6 +74,12 @@ def starTimeouter():
                 print "Sending Star"
                 serial.write('*');
 
+def isDebugMessage(data):
+    if(data[0] == '\xFE'):
+        print "MESSAGE: " + str(data[1:])
+        return True
+    else:
+        return False
 
 print sys.argv
 
@@ -129,7 +135,8 @@ try:
         while True:
             data = serial.read(32)
             print "READ: " + str(data.encode('hex_codec'))
-            databuffer.append(data)
+            if(not isDebugMessage(data)):
+                databuffer.append(data)
         
         
         serial.close()
