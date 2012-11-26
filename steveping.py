@@ -182,8 +182,8 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-    #send_init()
-    send_init_no_mesh()
+    send_init()
+    #send_init_no_mesh()
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
@@ -278,7 +278,7 @@ def send_init():
                 print "SENDING PINGS"
                 while True:
                         print "SENDING PING"
-                        payload = PayloadMessage('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+                        payload = PayloadMessage('\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
                         create_and_send_packet(0xFF,0x00,0x00,0x00,payload)
                         time.sleep(1)
                 break
@@ -300,6 +300,7 @@ def send_init():
 
 # Give the basestation its TDMA info
 def assign_basestation_tdma_info():
+    print "Sending TDMA info"
     payload = PayloadIdentification()
     payload.initialise(0,0)
     create_and_send_packet(0x00,0x00,0x00,0x0000,payload)
