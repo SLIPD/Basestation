@@ -20,10 +20,7 @@ class Packet(object):
     def __init__(self, data=None):
         if data != None:
             header = data[:6]
-            print "PACKET INIT: ",
-            print header.encode('hex_codec')
             payload = data[6:]
-            print payload.encode('hex_codec')
             self.originId,self.destinationId,self.ttl,self.msgType,self.timestamp = unpack('BBBBH',header)
             if self.msgType == 0:
                 self.payload = PayloadIdentification(payload)
@@ -33,7 +30,6 @@ class Packet(object):
                 self.payload = PayloadWaypoint(payload)
             elif self.msgType == 3:
                 self.payload = PayloadMessage(payload)
-            print self.payload
             
     def serialize(self):
         return pickle.dumps(self)

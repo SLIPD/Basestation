@@ -1,5 +1,7 @@
 # Facilitates communications from mesh to server
 # Sets up mesh by assigning addresses.
+# Sends names from server to mesh
+# 
 # SLIP Group D, Steven Eardley s0934142
 
 from zmq.core import context, socket
@@ -23,10 +25,11 @@ class MeshForwarder (threading.Thread):
     
     updates = []
     
-    def __init__(self, mesh_socket, server_stream):
+    def __init__(self, mesh_socket, server_stream, location_info):
         threading.Thread.__init__(self)
         self.in_socket = mesh_socket
         self.out_stream = server_stream
+        self.location_dict = location_info
         self.stop_event = threading.Event()        
 
     def stop(self):
@@ -45,7 +48,7 @@ class MeshForwarder (threading.Thread):
         while self.stop_event.is_set() == False:
             
             # If we already have lots of updates pending, send those.
-            if len(self.updates) > 4:
+            if len(self.updates) > 4 and len(self.updates) != 0:
                 self.send_to_server()
                 self.updates = []
             try:
@@ -60,14 +63,20 @@ class MeshForwarder (threading.Thread):
                 
                 location = Point(payload.getDecimalLatitude(), payload.getDecimalLongitude(), payload.getElevation()) 
                 game_coords = loc_translate(location)
-                self.updates.append([str(sender), game_coords])
+                
+                # Only send the message if the position is new
+                if self.loc_dict[sender] != game_coords:
+                    self.updates.append([str(sender), game_coords])
+                else:
+                    print "MeshForwarder: Speck is already known at %s. Not sending." % game_coords
                 
             except:
                 # If no more data, send what we have
-                self.send_to_server()
+                if len(self.updates) > 0:
+                    self.send_to_server()
                 
                 wait = 0.1
-                print "MeshForwarder: No Data received from mesh. Waiting %s sec." % wait
+                print "MeshForwarder: No new data received from mesh. Waiting %s sec." % wait
                 time.sleep(wait)
 
                 # Stop the thread if we waited for more than ten seconds
@@ -99,6 +108,9 @@ command_stream = zmqstream.ZMQStream(command_socket)
 pair_socket = None
 pair_stream = None
 
+# Stores the current known location of a node as {speckID : game_coords}
+loc_dict = dict()
+
 # Info to be filled in by server
 n_players = 0
 left_corner_of_area = None
@@ -113,8 +125,8 @@ current_free_address = 1
 # Stores the ID of the specks as {speckID : assignedAddress}
 id_dict = dict()
 
-# The GPS location of the base station
-base_gps = None
+# The game-coordinate location of the base station
+base_location = None
 
 # Handle different sorts of messages from server
 def pair_recv(msg):
@@ -126,7 +138,7 @@ def pair_recv(msg):
             j = jsonapi.loads(msg)
 
         if j['state'] == 'naming':
-            #assign_names(j['mapping'])
+            assign_names(j['mapping'])
             forward_from_mesh()
         elif j['state'] == 'commanding':
             send_commands(j['commanding'])
@@ -182,12 +194,12 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-    #send_init()
-    send_init_no_mesh()
+    send_init()
+    #send_init_no_mesh()
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
-    global mesh_listening_socket,mesh_sending_socket, current_free_address, n_players, pair_stream
+    global mesh_listening_socket, mesh_sending_socket, current_free_address, n_players, pair_stream, base_location
     
     mesh_listening_socket = SocketConnection('localhost')
     while True:
@@ -223,7 +235,7 @@ def send_init_no_mesh():
 def send_init():
     # Send initialisation information from mesh
     print "Connecting to mesh network..."
-    global mesh_listening_socket, mesh_sending_socket, n_players, base_gps
+    global mesh_listening_socket, mesh_sending_socket, n_players, base_location
     
     mesh_listening_socket = SocketConnection('localhost')
     
@@ -299,7 +311,7 @@ def assign_basestation_tdma_info():
 
 # Assign an address from the next free address
 def assign_address(speck_id):
-    global current_free_address
+    global current_free_address, base_location
     payload = PayloadIdentification()
     
     # Only assign an address if we don't have one yet, else send it again. 
@@ -308,6 +320,9 @@ def assign_address(speck_id):
         print "Speck {0} has now been given address {1}".format(speck_id, current_free_address)
         payload.initialise(speck_id, current_free_address)
         current_free_address += 1
+        
+        # Additionally, initialise the speck's location as at the base station
+        loc_dict[spec_id] = base_location
     else:
         print "Speck %s has already been identified" % speck_id
         payload.initialise(speck_id, id_dict[speck_id])
@@ -356,7 +371,7 @@ def send_commands(commands):
 
 def forward_from_mesh():
     global mesh_listening_socket, pair_stream
-    forwarding_thread = MeshForwarder(mesh_listening_socket, pair_stream)
+    forwarding_thread = MeshForwarder(mesh_listening_socket, pair_stream, loc_dict)
     forwarding_thread.start()
 
 def shut_up_mesh():
