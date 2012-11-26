@@ -21,10 +21,12 @@ import threading
 # ... Sorry.
 class MeshForwarder (threading.Thread):
     
+    updates = []
+    
     def __init__(self, mesh_socket, server_stream):
         threading.Thread.__init__(self)
-        self.inSocket = mesh_socket
-        self.outStream = server_stream
+        self.in_socket = mesh_socket
+        self.out_stream = server_stream
         self.stop_event = threading.Event()        
 
     def stop(self):
@@ -32,12 +34,23 @@ class MeshForwarder (threading.Thread):
             # set event to signal thread to terminate
             self.stop_event.set()
 
+    def send_to_server(self):
+        message_to_server = { "state": "play", "updates": self.updates }
+                
+        print "MeshForwarder: LOCATION MESSAGE: " + str(message_to_server)
+        self.out_stream.send_json(message_to_server)
+    
     def run(self):
         wait_counter = 0
         while self.stop_event.is_set() == False:
+            
+            # If we already have lots of updates pending, send those.
+            if len(self.updates) > 4:
+                self.send_to_server()
+                self.updates = []
             try:
-                data = mesh_listening_socket.receiveData()
-                
+                data = self.in_socket.receiveData()
+                #print "Incoming packet: " + str(data.encode('hex_codec'))
                 # If we get something, reset the counter
                 wait_counter = 0
                 
@@ -45,17 +58,14 @@ class MeshForwarder (threading.Thread):
                 sender = packet.getOriginId()
                 payload = packet.getPayload()
                 
-                if payload.getType == payload.PayloadNodePositionType:
-                    location = Point(payload.getDecimalLatitude(), payload.getDecimalLongitude(), payload.getElevation()) 
-                    print location
-                    game_coords = loc_translate(location)
-                    print game_coords
-                    
-                    message_to_server = { "state": "play", "updates": [str(sender), game_coords] }
-                    
-                    print "MeshForwarder: LOCATION MESSAGE: " + str(message_to_server)
-                    server_stream.send_json(message_to_server)
+                location = Point(payload.getDecimalLatitude(), payload.getDecimalLongitude(), payload.getElevation()) 
+                game_coords = loc_translate(location)
+                self.updates.append([str(sender), game_coords])
+                
             except:
+                # If no more data, send what we have
+                self.send_to_server()
+                
                 wait = 0.1
                 print "MeshForwarder: No Data received from mesh. Waiting %s sec." % wait
                 time.sleep(wait)
@@ -116,7 +126,7 @@ def pair_recv(msg):
             j = jsonapi.loads(msg)
 
         if j['state'] == 'naming':
-            assign_names(j['mapping'])
+            #assign_names(j['mapping'])
             forward_from_mesh()
         elif j['state'] == 'commanding':
             send_commands(j['commanding'])
@@ -177,10 +187,27 @@ def setup_pair(msg):
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
-    global mesh_listening_socket, current_free_address, n_players, pair_stream
+    global mesh_listening_socket,mesh_sending_socket, current_free_address, n_players, pair_stream
     
     mesh_listening_socket = SocketConnection('localhost')
+    while True:
+        if mesh_listening_socket.connectAsReceiver():
+            mesh_sending_socket = SocketConnection('', 29877)
+            if mesh_sending_socket.connectAsSender():
+                
+                # Start the connection to the mesh
+                print "Sending init packet to mesh"
+                mesh_sending_socket.sendData('*')
     
+                   # Tell the nodes to start using TDMA
+                assign_basestation_tdma_info()  
+                break
+            # If creating sockets doesn't work, wait and try again
+            else: 
+                time.sleep(1)
+        else:
+            time.sleep(1)
+            
     # Add dummy adresses for expected number of players
     for i in range(0, n_players):
         id_dict[i] = current_free_address
@@ -268,7 +295,7 @@ def send_init():
 def assign_basestation_tdma_info():
     payload = PayloadIdentification()
     payload.initialise(0,0)
-    create_and_send_packet(0x00,0x00,0x00,0x00,0x0000,payload)
+    create_and_send_packet(0x00,0x00,0x00,0x0000,payload)
 
 # Assign an address from the next free address
 def assign_address(speck_id):
@@ -290,11 +317,11 @@ def assign_address(speck_id):
    
 # Send a packet to a speck once it has an assigned address.
 def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
+    global mesh_sending_socket
     p = Packet()
     p.initialise(0,destinationId,ttl,msgType,timestamp,payload)
     print "Creating and Sending: "
     print p
-    global mesh_sending_socket
     try:
         mesh_sending_socket.sendData(p.getBytes())
         print "sent"

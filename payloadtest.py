@@ -1,5 +1,6 @@
 from payload import *
-p = PayloadNodePosition()
+p = PayloadNodePosition() #'\x03\x4F\xE7\x3F\x00\x01\xE9\x36\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
 p.initialise(55.943721, -3.175135,0,0)
 d = p.getPaddedBytes()
 print d.encode('hex_codec')
+print p
