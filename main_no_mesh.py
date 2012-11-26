@@ -2,6 +2,7 @@
 
 from SocketConnection import SocketConnection
 from Packet import Packet
+import random
 import threading
 import time
 import sys
@@ -76,9 +77,11 @@ try:
         while True:
             time.sleep(1)
             data = '\x01\x00\x00\x01\x00\x00\x98\xdf\x4f\x03\xc7\x9e\xd0\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            #data[9] = random.randrange(0,255) & 0xFF
+            
             print "READ: " + str(data.encode('hex_codec'))
             databuffer.append(data)
 except:
-    pass
+    raise
 finally:
     quit()

@@ -305,6 +305,7 @@ def send_init():
 
 # Give the basestation its TDMA info
 def assign_basestation_tdma_info():
+    print "Sending TDMA info"
     payload = PayloadIdentification()
     payload.initialise(0,0)
     create_and_send_packet(0x00,0x00,0x00,0x0000,payload)
