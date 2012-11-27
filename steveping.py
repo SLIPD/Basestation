@@ -276,10 +276,14 @@ def send_init():
                 assign_basestation_tdma_info()  
                 time.sleep(1)
                 print "SENDING PINGS"
+		messages = ['William','Pond','loves','the','cock']
+                counter = -1
                 while True:
+                        counter += 1
+                        counter = counter % len(messages)
                         print "SENDING PING"
                         payload = PayloadMessage()
-                        payload.initialisePing()
+                        payload.initialise(messages[counter] + "$PING")
                         create_and_send_packet(0xFF,0x01,0x03,0x00,payload)
                         time.sleep(5)
                 break

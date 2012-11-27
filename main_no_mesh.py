@@ -79,7 +79,7 @@ try:
             time.sleep(1)
 
             data = '\x01\x00\x00\x01\x00\x00\x98\xdf\x4f'
-            data += str(randrange(0,255) & 0xFF)
+            data += str(randrange(0,5) & 0xFF)
             data += '\xc7\x9e\xd0\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
             
             print "READ: " + str(data.encode('hex_codec'))

@@ -48,7 +48,7 @@ class MeshForwarder (threading.Thread):
         while self.stop_event.is_set() == False:
             
             # If we already have lots of updates pending, send those.
-            if len(self.updates) > 4 and len(self.updates) != 0:
+            if len(self.updates) > 4:# and len(self.updates) != 0:
                 self.send_to_server()
                 self.updates = []
             try:
@@ -65,10 +65,10 @@ class MeshForwarder (threading.Thread):
                 game_coords = loc_translate(location)
                 
                 # Only send the message if the position is new
-                if self.loc_dict[sender] != game_coords:
-                    self.updates.append([str(sender), game_coords])
-                else:
-                    print "MeshForwarder: Speck is already known at %s. Not sending." % game_coords
+                #if self.loc_dict[sender] != game_coords:
+                self.updates.append([str(sender), game_coords])
+                #else:
+                    #print "MeshForwarder: Speck is already known at %s. Not sending." % game_coords
                 
             except:
                 # If no more data, send what we have
@@ -194,8 +194,8 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-    #send_init()
-    send_init_no_mesh()
+    send_init()
+    #send_init_no_mesh()
 
 # Dummy initialisation with the server
 def send_init_no_mesh():

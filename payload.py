@@ -204,7 +204,7 @@ class PayloadMessage(object):
         self.encrypted = False
         
     def initialisePing(self):
-        self.message = "$PING"
+        self.message = "I R PINGINGZ$PING"
         self.encrypted = False
         
     def getMessagePart(self):

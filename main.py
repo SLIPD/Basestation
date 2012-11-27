@@ -3,6 +3,7 @@
 from SerialConnection import SerialConnection
 from SocketConnection import SocketConnection
 from Packet import Packet
+from payload import *
 import threading
 import time
 import sys
@@ -143,6 +144,8 @@ try:
             data = serial.read(32)
             print "READ: " + str(data.encode('hex_codec'))
             if(not isDebugMessage(data)):
+                packet = Packet(data)
+                print "PACKET: " + str(packet)
                 databuffer.append(data)
         
         
