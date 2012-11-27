@@ -42,8 +42,8 @@ class Base64Compression:
         output = ""
         stringLen = len(string);
         for i in range(0,stringLen):
-            output += "%.2X " % string[i]
-        return output
+            output += "%s" % repr(string[i])
+        return ''.join(output)
     
     def printHexString(self,string):
         stringLen = len(string);
