@@ -75,11 +75,15 @@ def starTimeouter():
                 serial.write('*');
 
 def isDebugMessage(data):
-    if(data[0] == '\xFE'):
-        print "MESSAGE: " + str(data[1:])
+    try:
+        if(data[0] == '\xFE'):
+            print "MESSAGE: " + str(data[1:])
+            open('msglog.txt','a').write(str(data[1:]))
+            return True
+        else:
+            return False
+    except:
         return True
-    else:
-        return False
 
 print sys.argv
 
@@ -121,8 +125,8 @@ try:
             serial.flush()
         
         print "Removing nulls"
-        #serial.removeInitialNulls()
-        print serial.read(1)
+        serial.removeInitialNulls()
+        #print serial.read(1)
         sendStars = False
         print "NULLS REMOVED"
         

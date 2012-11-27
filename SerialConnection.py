@@ -16,7 +16,7 @@ class SerialConnection:
 	
 	def removeInitialNulls(self):
 		char = self.read(1)
-		while(char != '*'):
+		while(char != '*' and char != '#'):
 			char = self.read(1)
 			print char,
 		print ""
