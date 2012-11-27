@@ -279,7 +279,7 @@ def send_init():
                 while True:
                         print "SENDING PING"
                         payload = PayloadMessage('\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',True)
-                        create_and_send_packet(0xFF,0x00,0x00,0x00,payload)
+                        create_and_send_packet(0xFF,0x01,0x03,0x00,payload)
                         time.sleep(1)
                 break
             # If creating sockets doesn't work, wait and try again
@@ -328,8 +328,7 @@ def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
     global mesh_sending_socket
     p = Packet()
     p.initialise(0,destinationId,ttl,msgType,timestamp,payload)
-    print "Creating and Sending: "
-    print p
+    print "Creating and Sending: " + str(p)
     try:
         mesh_sending_socket.sendData(p.getBytes())
         print "sent"
