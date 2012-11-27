@@ -278,7 +278,7 @@ def send_init():
                 print "SENDING PINGS"
                 while True:
                         print "SENDING PING"
-                        payload = PayloadMessage('\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+                        payload = PayloadMessage('\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',True)
                         create_and_send_packet(0xFF,0x00,0x00,0x00,payload)
                         time.sleep(1)
                 break

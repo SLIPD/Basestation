@@ -194,8 +194,8 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-    send_init()
-    #send_init_no_mesh()
+    #send_init()
+    send_init_no_mesh()
 
 # Dummy initialisation with the server
 def send_init_no_mesh():

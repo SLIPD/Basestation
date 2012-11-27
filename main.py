@@ -115,14 +115,16 @@ try:
         while not isReady:
             time.sleep(0.1)
         
-        print "Sending speck ready message"
+        print "Sending speck ready message:",
         
         if fakePacket:
             serial.write('#')
-            serial.flush()
+            print '#'
+            #serial.flush()
         else:
             serial.write('*')
-            serial.flush()
+            print '*'
+            #serial.flush()
         
         print "Removing nulls"
         serial.removeInitialNulls()
@@ -133,6 +135,7 @@ try:
         if fakePacket:
             print "Writing fake GPS packet"
             serial.write('\x00\x00\x00\x01\x00\x00\x03\x4F\xE7\x3F\x00\x01\xE9\x36\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+            print "Fake packet sent"
         
         
         
