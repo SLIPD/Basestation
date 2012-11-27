@@ -202,6 +202,26 @@ class PayloadMessage(object):
     def initialise(self, message):
         self.message = message
         self.encrypted = False
+        
+    def initialisePing(self):
+        self.message = "$PING"
+        self.encrypted = False
+        
+    def getMessagePart(self):
+        self.decryptMessage()
+        if('$' in self.message):
+            return self.message[:message.find('$')]
+        return self.message
+        
+    def getDebugPart(self):
+        self.decryptMessage()
+        if('$' in self.message):
+            m = self.message[message.find('$'):]
+            return m[1:]
+        return ""
+        
+    def isPong(self):
+        return (self.getDebugPart == "PONG")
     
     def getType(self):
         return 0x03

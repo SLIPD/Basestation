@@ -278,9 +278,10 @@ def send_init():
                 print "SENDING PINGS"
                 while True:
                         print "SENDING PING"
-                        payload = PayloadMessage('\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',True)
+                        payload = PayloadMessage()
+                        payload.initialisePing()
                         create_and_send_packet(0xFF,0x01,0x03,0x00,payload)
-                        time.sleep(1)
+                        time.sleep(5)
                 break
             # If creating sockets doesn't work, wait and try again
             else: 
