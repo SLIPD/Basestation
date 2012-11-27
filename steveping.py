@@ -276,7 +276,7 @@ def send_init():
                 assign_basestation_tdma_info()  
                 time.sleep(1)
                 print "SENDING PINGS"
-		messages = ['William','Pond','loves','the','cock']
+                messages = ['Hello','from','slip','group','d']
                 counter = -1
                 while True:
                         counter += 1
@@ -285,7 +285,7 @@ def send_init():
                         payload = PayloadMessage()
                         payload.initialise(messages[counter] + "$PING")
                         create_and_send_packet(0xFF,0x01,0x03,0x00,payload)
-                        time.sleep(5)
+                        time.sleep(1)
                 break
             # If creating sockets doesn't work, wait and try again
             else: 
