@@ -67,7 +67,7 @@ def send_init():
                 print "Base GPS: " + str(base_gps)
                 
                 mesh_listening_socket.setTimeout(1.0)
-                                
+                n_players = 3
                 # Assign addresses to the expected number of nodes
                 s_time = time.time()
                 while (len(id_dict) <= n_players):
@@ -137,15 +137,22 @@ def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
 
 # Give names to all specks as messages
 def assign_names(names):
-    m = PayloadMessage()
-    m.initialise("WILL$N")
-    for i in range(1,5):
-        create_and_send_packet(1, 1, 3, 0, m) 
-        time.sleep(1)
-    for i in range(1,5):
-        w = PayloadWaypoint(1,[(56,0),(56,0),(56,0)])
-        create_and_send_packet(1,1,2,0,w)
-        time.sleep(1)
+    while True:
+        print "Enter message: ",
+        message = raw_input()
+        print "Enter bearing: ",
+        bearing = raw_input()
+        if(len(message) > 22):
+            message = message[:22]
+        message = message + "$" + bearing
+        if(len(message) > 1):
+            m = PayloadMessage()
+            m.initialise(str(message))
+            for i in range(1,5):
+                create_and_send_packet(1, 1, 3, 0, m) 
+                time.sleep(1)
+
+    
     
     
 
