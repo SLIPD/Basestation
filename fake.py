@@ -63,14 +63,12 @@ def send_init():
                 first_packet = Packet(firstData)
                 first_payload = first_packet.getPayload()
                 print first_payload
-                base_gps = Point(first_payload.getDecimalLatitude(), first_payload.getDecimalLongitude(), first_payload.getElevation())
-                print "Base GPS: " + str(base_gps)
                 
                 mesh_listening_socket.setTimeout(1.0)
                                 
                 # Assign addresses to the expected number of nodes
                 s_time = time.time()
-                while (len(id_dict) <= n_players):
+                while (len(id_dict) <= 1):
                     if (time.time() > s_time + 10):
                         break;
                     print "Time remaining: " + str(int(s_time + 10 - time.time() + 0.5))
@@ -82,7 +80,7 @@ def send_init():
                             speck_id = packet.getPayload().getId()
                             
                             print "Id request from %s" % speck_id
-                            
+                            id_dict.append(speck_id) 
                             # Respond to all requests: packet may have dropped
                             assign_address(speck_id)
                             print "Address assigned"
@@ -136,7 +134,7 @@ def create_and_send_packet(destinationId,ttl,msgType,timestamp,payload):
         print "A connection error happened. Are you simulating the mesh?"
 
 # Give names to all specks as messages
-def assign_names(names):
+def assign_names():
     m = PayloadMessage()
     m.initialise("WILL$N")
     for i in range(1,5):

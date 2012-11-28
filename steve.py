@@ -16,6 +16,8 @@ from payload import *
 from geopy.point import Point
 from geopy.distance import distance
 
+from random import randrange
+
 import time
 import threading
 
@@ -66,7 +68,8 @@ class MeshForwarder (threading.Thread):
                 
                 # Only send the message if the position is new
                 #if self.loc_dict[sender] != game_coords:
-                self.updates.append([str(sender), game_coords])
+                #self.updates.append([str(sender), game_coords])
+                self.updates.append([str(randrange(1,4)), [randrange(0,49), randrange(0,49), randrange(0, 20)]])
                 #else:
                     #print "MeshForwarder: Speck is already known at %s. Not sending." % game_coords
                 
@@ -194,8 +197,8 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
     
     # Send the reply
-    send_init()
-    #send_init_no_mesh()
+    #send_init()
+    send_init_no_mesh()
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
@@ -210,9 +213,6 @@ def send_init_no_mesh():
                 # Start the connection to the mesh
                 print "Sending init packet to mesh"
                 mesh_sending_socket.sendData('*')
-    
-                   # Tell the nodes to start using TDMA
-                assign_basestation_tdma_info()  
                 break
             # If creating sockets doesn't work, wait and try again
             else: 
@@ -377,7 +377,6 @@ def forward_from_mesh():
 
 def shut_up_mesh():
     forwarding_thread.stop()
-
 
 # Set the ball rolling...
 print "Saying hello to server..."
