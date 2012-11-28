@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Facilitates communications from mesh to server
 # Sets up mesh by assigning addresses.
 # Sends names from server to mesh
@@ -69,8 +70,8 @@ class MeshForwarder (threading.Thread):
 
                 # Only send the message if the position is new
                 #if self.loc_dict[sender] != game_coords:
-                self.updates.append([str(sender), game_coords])
-                #self.updates.append([str(randrange(1,5)), [randrange(0,49), randrange(0,49), randrange(0, 20)]])
+                #self.updates.append([str(sender), game_coords])
+                self.updates.append([str(randrange(1,5)), [randrange(0,49), randrange(0,49), randrange(0, 20)]])
                 #else:
                     #print "MeshForwarder: Speck is already known at %s. Not sending." % game_coords
 
@@ -197,8 +198,8 @@ def setup_pair(msg):
     pair_stream.on_recv(pair_recv)
 
     # Send the reply
-    send_init()
-    #send_init_no_mesh()
+    #send_init()
+    send_init_no_mesh()
 
 # Dummy initialisation with the server
 def send_init_no_mesh():
