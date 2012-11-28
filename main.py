@@ -22,13 +22,13 @@ def sendLoop():
             global socketConnection
             socketConnection.sendData(currentMsg)
         time.sleep(0.1)
-        
+
 def isNulls(data):
     for i in range(0,len(data)):
         if(data[i] != '\0'):
             return False
     return True
-    
+
 def getInput():
     global printNulls
     try:
@@ -47,7 +47,7 @@ def getInput():
                         isReady = True
                         #threading.Thread(target = starTimeouter).start()
                         break
-            
+
             while True:
                 data = listeningSocket.receiveData(32)
                 if(not isNulls(data)):
@@ -96,28 +96,28 @@ try:
     isReady = False
     printNulls = True
     sendStars = True
-    
+
     serial = SerialConnection()
     print "Serial created"
-    
+
     serial.connect("/dev/ttyUSB0")
     print "Serial Connected..."
-    
+
     socketConnection = SocketConnection()
-    
+
     print "Socket created"
-    
+
     if(socketConnection.connectAsSender()):
         threading.Thread(target = sendLoop).start()
         threading.Thread(target = getInput).start()
-        
+
         print 'Thread started'
-        
+
         while not isReady:
             time.sleep(0.1)
-        
+
         print "Sending speck ready message:",
-        
+
         if fakePacket:
             serial.write('#')
             print '#'
@@ -126,20 +126,20 @@ try:
             serial.write('*')
             print '*'
             #serial.flush()
-        
+
         print "Removing nulls"
         serial.removeInitialNulls()
         #print serial.read(1)
         sendStars = False
         print "NULLS REMOVED"
-        
+
         if fakePacket:
             print "Writing fake GPS packet"
             serial.write('\x00\x00\x00\x01\x00\x00\x03\x4F\xE7\x3F\x00\x01\xE9\x36\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
             print "Fake packet sent"
-        
-        
-        
+
+
+
         while True:
             data = serial.read(32)
             print "READ: " + str(data.encode('hex_codec'))
@@ -147,8 +147,8 @@ try:
                 packet = Packet(data)
                 print "PACKET: " + str(packet)
                 databuffer.append(data)
-        
-        
+
+
         serial.close()
 except:
     pass
