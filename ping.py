@@ -34,13 +34,12 @@ try:
             counter = 0
         #senddata = '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00'
         senddata = struct.pack('QQQBBBBBBBB',0,0,0,counter,0,0,0,0,0,0,0)
-        start = time.clock()
-        #print "pinging with " + str(len(senddata)) + " bytes of data"
-        serial.write(senddata)
-        data = serial.read(32)
-        delta = time.clock() - start
+        with Timer() as t:
+            #print "pinging with " + str(len(senddata)) + " bytes of data"
+            serial.write(senddata)
+            data = serial.read(32)
         if(data != ''):
-            print str(delta)
+            print str(t.interval)
             #print "DATA: " + str(data.encode('hex_codec'))
         else:
             print "TIMEOUT"
