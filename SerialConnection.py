@@ -6,10 +6,10 @@ class SerialConnection:
 
 	connection = None
 	
-	def connect(self, device, baudrate=115200):
+	def connect(self, device, baudrate=115200, timeout=3):
 		while True:
 			try:
-				self.connection=serial.Serial(device,baudrate)
+				self.connection=serial.Serial(device,baudrate, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_ONE, 3)
 				return True
 			except:
 				pass
